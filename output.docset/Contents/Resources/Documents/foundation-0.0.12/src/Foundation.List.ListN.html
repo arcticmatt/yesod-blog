@@ -1,0 +1,188 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css"></link><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-comment">-- |</span><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-2" name="line-2"></a><span class="hs-comment">-- Module      : Foundation.List.ListN</span><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-3" name="line-3"></a><span class="hs-comment">-- License     : BSD-style</span><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-4" name="line-4"></a><span class="hs-comment">-- Maintainer  : Vincent Hanquez &lt;vincent@snarc.org&gt;</span><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-5" name="line-5"></a><span class="hs-comment">-- Stability   : experimental</span><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-6" name="line-6"></a><span class="hs-comment">-- Portability : portable</span><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-7" name="line-7"></a><span class="hs-comment">--</span><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-8" name="line-8"></a><span class="hs-comment">-- A Nat-sized list abstraction</span><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-9" name="line-9"></a><span class="hs-comment">--</span><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-10" name="line-10"></a><span class="hs-comment">-- Using this module is limited to GHC 7.10 and above.</span><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-11" name="line-11"></a><span class="hs-comment">--</span><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-12" name="line-12"></a><span class="hs-pragma">{-# LANGUAGE KindSignatures            #-}</span><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-13" name="line-13"></a><span class="hs-pragma">{-# LANGUAGE DataKinds                 #-}</span><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-14" name="line-14"></a><span class="hs-pragma">{-# LANGUAGE GADTs                     #-}</span><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-15" name="line-15"></a><span class="hs-pragma">{-# LANGUAGE TypeOperators             #-}</span><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-16" name="line-16"></a><span class="hs-pragma">{-# LANGUAGE TypeFamilies              #-}</span><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-17" name="line-17"></a><span class="hs-pragma">{-# LANGUAGE ExistentialQuantification #-}</span><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-18" name="line-18"></a><span class="hs-pragma">{-# LANGUAGE ScopedTypeVariables       #-}</span><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-19" name="line-19"></a><span class="hs-pragma">{-# LANGUAGE UndecidableInstances      #-}</span><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-20" name="line-20"></a><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Foundation</span><span class="hs-operator">.</span><span class="hs-identifier">List</span><span class="hs-operator">.</span><span class="hs-identifier">ListN</span><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-21" name="line-21"></a><span>    </span><span class="hs-special">(</span><span> </span><a href="../foundation-0.0.12/Foundation.List.ListN.html#ListN"><span class="hs-identifier hs-type">ListN</span></a><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-22" name="line-22"></a><span>    </span><span class="hs-special">,</span><span> </span><a href="../foundation-0.0.12/Foundation.List.ListN.html#toListN"><span class="hs-identifier hs-var">toListN</span></a><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-23" name="line-23"></a><span>    </span><span class="hs-special">,</span><span> </span><a href="../foundation-0.0.12/Foundation.List.ListN.html#unListN"><span class="hs-identifier hs-var">unListN</span></a><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-24" name="line-24"></a><span>    </span><span class="hs-special">,</span><span> </span><a href="../foundation-0.0.12/Foundation.List.ListN.html#length"><span class="hs-identifier hs-var">length</span></a><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-25" name="line-25"></a><span>    </span><span class="hs-special">,</span><span> </span><a href="../foundation-0.0.12/Foundation.List.ListN.html#create"><span class="hs-identifier hs-var">create</span></a><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-26" name="line-26"></a><span>    </span><span class="hs-special">,</span><span> </span><a href="../foundation-0.0.12/Foundation.List.ListN.html#createFrom"><span class="hs-identifier hs-var">createFrom</span></a><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-27" name="line-27"></a><span>    </span><span class="hs-special">,</span><span> </span><a href="../foundation-0.0.12/Foundation.List.ListN.html#empty"><span class="hs-identifier hs-var">empty</span></a><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-28" name="line-28"></a><span>    </span><span class="hs-special">,</span><span> </span><a href="../foundation-0.0.12/Foundation.List.ListN.html#singleton"><span class="hs-identifier hs-var">singleton</span></a><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-29" name="line-29"></a><span>    </span><span class="hs-special">,</span><span> </span><a href="../foundation-0.0.12/Foundation.List.ListN.html#uncons"><span class="hs-identifier hs-var">uncons</span></a><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-30" name="line-30"></a><span>    </span><span class="hs-special">,</span><span> </span><a href="../foundation-0.0.12/Foundation.List.ListN.html#cons"><span class="hs-identifier hs-var">cons</span></a><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-31" name="line-31"></a><span>    </span><span class="hs-special">,</span><span> </span><a href="../foundation-0.0.12/Foundation.List.ListN.html#map"><span class="hs-identifier hs-var">map</span></a><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-32" name="line-32"></a><span>    </span><span class="hs-special">,</span><span> </span><a href="../foundation-0.0.12/Foundation.List.ListN.html#elem"><span class="hs-identifier hs-var">elem</span></a><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-33" name="line-33"></a><span>    </span><span class="hs-special">,</span><span> </span><a href="../foundation-0.0.12/Foundation.List.ListN.html#foldl"><span class="hs-identifier hs-var">foldl</span></a><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-34" name="line-34"></a><span>    </span><span class="hs-special">,</span><span> </span><a href="../foundation-0.0.12/Foundation.List.ListN.html#append"><span class="hs-identifier hs-var">append</span></a><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-35" name="line-35"></a><span>    </span><span class="hs-special">,</span><span> </span><a href="../foundation-0.0.12/Foundation.List.ListN.html#minimum"><span class="hs-identifier hs-var">minimum</span></a><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-36" name="line-36"></a><span>    </span><span class="hs-special">,</span><span> </span><a href="../foundation-0.0.12/Foundation.List.ListN.html#maximum"><span class="hs-identifier hs-var">maximum</span></a><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-37" name="line-37"></a><span>    </span><span class="hs-special">,</span><span> </span><a href="../foundation-0.0.12/Foundation.List.ListN.html#head"><span class="hs-identifier hs-var">head</span></a><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-38" name="line-38"></a><span>    </span><span class="hs-special">,</span><span> </span><a href="../foundation-0.0.12/Foundation.List.ListN.html#tail"><span class="hs-identifier hs-var">tail</span></a><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-39" name="line-39"></a><span>    </span><span class="hs-special">,</span><span> </span><a href="../foundation-0.0.12/Foundation.List.ListN.html#take"><span class="hs-identifier hs-var">take</span></a><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-40" name="line-40"></a><span>    </span><span class="hs-special">,</span><span> </span><a href="../foundation-0.0.12/Foundation.List.ListN.html#drop"><span class="hs-identifier hs-var">drop</span></a><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-41" name="line-41"></a><span>    </span><span class="hs-special">,</span><span> </span><a href="../foundation-0.0.12/Foundation.List.ListN.html#zip"><span class="hs-identifier hs-var">zip</span></a><span class="hs-special">,</span><span> </span><a href="../foundation-0.0.12/Foundation.List.ListN.html#zip3"><span class="hs-identifier hs-var">zip3</span></a><span class="hs-special">,</span><span> </span><a href="../foundation-0.0.12/Foundation.List.ListN.html#zip4"><span class="hs-identifier hs-var">zip4</span></a><span class="hs-special">,</span><span> </span><a href="../foundation-0.0.12/Foundation.List.ListN.html#zip5"><span class="hs-identifier hs-var">zip5</span></a><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-42" name="line-42"></a><span>    </span><span class="hs-special">,</span><span> </span><a href="../foundation-0.0.12/Foundation.List.ListN.html#zipWith"><span class="hs-identifier hs-var">zipWith</span></a><span class="hs-special">,</span><span> </span><a href="../foundation-0.0.12/Foundation.List.ListN.html#zipWith3"><span class="hs-identifier hs-var">zipWith3</span></a><span class="hs-special">,</span><span> </span><a href="../foundation-0.0.12/Foundation.List.ListN.html#zipWith4"><span class="hs-identifier hs-var">zipWith4</span></a><span class="hs-special">,</span><span> </span><a href="../foundation-0.0.12/Foundation.List.ListN.html#zipWith5"><span class="hs-identifier hs-var">zipWith5</span></a><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-43" name="line-43"></a><span>    </span><span class="hs-special">,</span><span> </span><a href="../foundation-0.0.12/Foundation.List.ListN.html#replicateM"><span class="hs-identifier hs-var">replicateM</span></a><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-44" name="line-44"></a><span>    </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-45" name="line-45"></a><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-46" name="line-46"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">Data</span><span class="hs-operator">.</span><span class="hs-identifier">Proxy</span><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-47" name="line-47"></a><span class="hs-keyword">import</span><span>           </span><a href="../foundation-0.0.12/Foundation.Internal.Base.html"><span class="hs-identifier">Foundation</span><span class="hs-operator">.</span><span class="hs-identifier">Internal</span><span class="hs-operator">.</span><span class="hs-identifier">Base</span></a><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-48" name="line-48"></a><span class="hs-keyword">import</span><span>           </span><a href="../foundation-0.0.12/Foundation.Primitive.Nat.html"><span class="hs-identifier">Foundation</span><span class="hs-operator">.</span><span class="hs-identifier">Primitive</span><span class="hs-operator">.</span><span class="hs-identifier">Nat</span></a><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-49" name="line-49"></a><span class="hs-keyword">import</span><span>           </span><a href="../foundation-0.0.12/Foundation.Numerical.html"><span class="hs-identifier">Foundation</span><span class="hs-operator">.</span><span class="hs-identifier">Numerical</span></a><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-50" name="line-50"></a><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-identifier">Prelude</span><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-51" name="line-51"></a><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-identifier">Control</span><span class="hs-operator">.</span><span class="hs-identifier">Monad</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="hs-identifier">M</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-var">replicateM</span><span class="hs-special">)</span><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-52" name="line-52"></a><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-53" name="line-53"></a><span class="hs-identifier">impossible</span><span> </span><span class="hs-glyph">::</span><span> </span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#local-6989586621679067424"><span class="hs-identifier hs-type">a</span></a><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-54" name="line-54"></a><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#impossible" name="impossible"><a href="../foundation-0.0.12/Foundation.List.ListN.html#impossible"><span class="hs-identifier">impossible</span></a></a><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier hs-var">error</span><span> </span><span class="hs-string">&quot;ListN: internal error: the impossible happened&quot;</span><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-55" name="line-55"></a><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-56" name="line-56"></a><span class="hs-keyword">newtype</span><span> </span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#ListN" name="ListN"><a href="../foundation-0.0.12/Foundation.List.ListN.html#ListN"><span class="hs-identifier">ListN</span></a></a><span> </span><span class="hs-special">(</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#local-6989586621679067338" name="local-6989586621679067338"><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#local-6989586621679067338"><span class="hs-identifier">n</span></a></a><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-identifier hs-type">Nat</span><span class="hs-special">)</span><span> </span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#local-6989586621679067339" name="local-6989586621679067339"><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#local-6989586621679067339"><span class="hs-identifier">a</span></a></a><span> </span><span class="hs-glyph">=</span><span> </span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#ListN" name="ListN"><a href="../foundation-0.0.12/Foundation.List.ListN.html#ListN"><span class="hs-identifier">ListN</span></a></a><span> </span><span class="hs-special">{</span><span> </span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#unListN" name="unListN"><a href="../foundation-0.0.12/Foundation.List.ListN.html#unListN"><span class="hs-identifier">unListN</span></a></a><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#local-6989586621679067339"><span class="hs-identifier hs-type">a</span></a><span class="hs-special">]</span><span> </span><span class="hs-special">}</span><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-57" name="line-57"></a><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-58" name="line-58"></a><span class="hs-identifier">toListN</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span class="hs-special">(</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#local-6989586621679067422" name="local-6989586621679067422"><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#local-6989586621679067422"><span class="hs-identifier">n</span></a></a><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-identifier hs-type">Nat</span><span class="hs-special">)</span><span> </span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#local-6989586621679067423" name="local-6989586621679067423"><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#local-6989586621679067423"><span class="hs-identifier">a</span></a></a><span> </span><span class="hs-operator">.</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">KnownNat</span><span> </span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#local-6989586621679067422"><span class="hs-identifier hs-type">n</span></a><span class="hs-special">,</span><span> </span><a href="../foundation-0.0.12/Foundation.Primitive.Nat.html#NatWithinBound"><span class="hs-identifier hs-type">NatWithinBound</span></a><span> </span><span class="hs-identifier hs-type">Int</span><span> </span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#local-6989586621679067422"><span class="hs-identifier hs-type">n</span></a><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-special">[</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#local-6989586621679067423"><span class="hs-identifier hs-type">a</span></a><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier hs-type">Maybe</span><span> </span><span class="hs-special">(</span><a href="../foundation-0.0.12/Foundation.List.ListN.html#ListN"><span class="hs-identifier hs-type">ListN</span></a><span> </span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#local-6989586621679067422"><span class="hs-identifier hs-type">n</span></a><span> </span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#local-6989586621679067423"><span class="hs-identifier hs-type">a</span></a><span class="hs-special">)</span><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-59" name="line-59"></a><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#toListN" name="toListN"><a href="../foundation-0.0.12/Foundation.List.ListN.html#toListN"><span class="hs-identifier">toListN</span></a></a><span> </span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#local-6989586621679067425" name="local-6989586621679067425"><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#local-6989586621679067425"><span class="hs-identifier">l</span></a></a><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-60" name="line-60"></a><span>    </span><span class="hs-glyph">|</span><span> </span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#local-6989586621679067426"><span class="hs-identifier hs-var">expected</span></a><span> </span><span class="hs-operator hs-var">==</span><span> </span><span class="hs-identifier hs-var">Prelude</span><span class="hs-operator hs-var">.</span><span class="hs-identifier hs-var">fromIntegral</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-var">Prelude</span><span class="hs-operator hs-var">.</span><span class="hs-identifier hs-var">length</span><span> </span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#local-6989586621679067425"><span class="hs-identifier hs-var">l</span></a><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier hs-var">Just</span><span> </span><span class="hs-special">(</span><a href="../foundation-0.0.12/Foundation.List.ListN.html#ListN"><span class="hs-identifier hs-var">ListN</span></a><span> </span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#local-6989586621679067425"><span class="hs-identifier hs-var">l</span></a><span class="hs-special">)</span><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-61" name="line-61"></a><span>    </span><span class="hs-glyph">|</span><span> </span><span class="hs-identifier hs-var">otherwise</span><span>                                           </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier hs-var">Nothing</span><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-62" name="line-62"></a><span>  </span><span class="hs-keyword">where</span><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-63" name="line-63"></a><span>    </span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#local-6989586621679067426" name="local-6989586621679067426"><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#local-6989586621679067426"><span class="hs-identifier">expected</span></a></a><span> </span><span class="hs-glyph">=</span><span> </span><a href="../foundation-0.0.12/Foundation.Primitive.Nat.html#natValInt"><span class="hs-identifier hs-var">natValInt</span></a><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-var">Proxy</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-identifier hs-type">Proxy</span><span> </span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#local-6989586621679067422"><span class="hs-identifier hs-type">n</span></a><span class="hs-special">)</span><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-64" name="line-64"></a><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-65" name="line-65"></a><span class="hs-identifier">replicateM</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-keyword">forall</span><span> </span><span class="hs-special">(</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#local-6989586621679067419" name="local-6989586621679067419"><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#local-6989586621679067419"><span class="hs-identifier">n</span></a></a><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-identifier hs-type">Nat</span><span class="hs-special">)</span><span> </span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#local-6989586621679067420" name="local-6989586621679067420"><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#local-6989586621679067420"><span class="hs-identifier">m</span></a></a><span> </span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#local-6989586621679067421" name="local-6989586621679067421"><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#local-6989586621679067421"><span class="hs-identifier">a</span></a></a><span> </span><span class="hs-operator">.</span><span> </span><span class="hs-special">(</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#local-6989586621679067419"><span class="hs-identifier hs-type">n</span></a><span> </span><span class="hs-operator">&lt;=</span><span> </span><span class="hs-number">0x100000</span><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-type">Monad</span><span> </span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#local-6989586621679067420"><span class="hs-identifier hs-type">m</span></a><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-type">KnownNat</span><span> </span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#local-6989586621679067419"><span class="hs-identifier hs-type">n</span></a><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#local-6989586621679067420"><span class="hs-identifier hs-type">m</span></a><span> </span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#local-6989586621679067421"><span class="hs-identifier hs-type">a</span></a><span> </span><span class="hs-glyph">-&gt;</span><span> </span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#local-6989586621679067420"><span class="hs-identifier hs-type">m</span></a><span> </span><span class="hs-special">(</span><a href="../foundation-0.0.12/Foundation.List.ListN.html#ListN"><span class="hs-identifier hs-type">ListN</span></a><span> </span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#local-6989586621679067419"><span class="hs-identifier hs-type">n</span></a><span> </span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#local-6989586621679067421"><span class="hs-identifier hs-type">a</span></a><span class="hs-special">)</span><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-66" name="line-66"></a><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#replicateM" name="replicateM"><a href="../foundation-0.0.12/Foundation.List.ListN.html#replicateM"><span class="hs-identifier">replicateM</span></a></a><span> </span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#local-6989586621679067427" name="local-6989586621679067427"><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#local-6989586621679067427"><span class="hs-identifier">action</span></a></a><span> </span><span class="hs-glyph">=</span><span> </span><a href="../foundation-0.0.12/Foundation.List.ListN.html#ListN"><span class="hs-identifier hs-var">ListN</span></a><span> </span><span class="hs-operator hs-var">&lt;$&gt;</span><span> </span><span class="hs-identifier hs-var">M</span><span class="hs-operator hs-var">.</span><span class="hs-identifier hs-var">replicateM</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-var">Prelude</span><span class="hs-operator hs-var">.</span><span class="hs-identifier hs-var">fromIntegral</span><span> </span><span class="hs-operator hs-var">$</span><span> </span><span class="hs-identifier hs-var">natVal</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-var">Proxy</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-identifier hs-type">Proxy</span><span> </span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#local-6989586621679067419"><span class="hs-identifier hs-type">n</span></a><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#local-6989586621679067427"><span class="hs-identifier hs-var">action</span></a><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-67" name="line-67"></a><span>
+</span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#line-68" name="line-68"></a><span class="hs-identifier">uncons</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-identifier hs-type">CmpNat</span><span> </span><a href="../foundation-0.0.12/src/Foundation.List.ListN.html#local-6989586621679067417"><span class="hs-identifier hs-type">n</span></a><span> </span><span class="hs-number">0</span><span> </span><span class="hs-glyph">~</span><span> </span><span class="hs-char">'GT =&gt; ListN n a -&gt; (a, ListN (n-1) a)
+uncons (ListN (x:xs)) = (x, ListN xs)
+uncons _ = impossible
+
+cons :: a -&gt; ListN n a -&gt; ListN (n+1) a
+cons a (ListN l) = ListN (a : l)
+
+empty :: ListN 0 a
+empty = ListN []
+
+length :: forall a (n :: Nat) . (KnownNat n, NatWithinBound Int n) =&gt; ListN n a -&gt; Int
+length _ = natValInt (Proxy :: Proxy n)
+
+create :: forall a (n :: Nat) . KnownNat n =&gt; (Integer -&gt; a) -&gt; ListN n a
+create f = ListN $ Prelude.map f [0..(len-1)]
+  where
+    len = natVal (Proxy :: Proxy n)
+
+createFrom :: forall a (n :: Nat) (start :: Nat) . (KnownNat n, KnownNat start)
+           =&gt; Proxy start -&gt; (Integer -&gt; a) -&gt; ListN n a
+createFrom p f = ListN $ Prelude.map f [idx..(idx+len)]
+  where
+    len = natVal (Proxy :: Proxy n)
+    idx = natVal p
+
+singleton :: a -&gt; ListN 1 a
+singleton a = ListN [a]
+
+elem :: Eq a =&gt; a -&gt; ListN n a -&gt; Bool
+elem a (ListN l) = Prelude.elem a l
+
+append :: ListN n a -&gt; ListN m a -&gt; ListN (n+m) a
+append (ListN l1) (ListN l2) = ListN (l1 &lt;&gt; l2)
+
+maximum :: (Ord a, CmpNat n 0 ~ 'GT) =&gt; ListN n a -&gt; a
+maximum (ListN l) = Prelude.maximum l
+
+minimum :: (Ord a, CmpNat n 0 ~ 'GT) =&gt; ListN n a -&gt; a
+minimum (ListN l) = Prelude.minimum l
+
+head :: CmpNat n 0 ~ 'GT =&gt; ListN n a -&gt; a
+head (ListN (x:_)) = x
+head _ = impossible
+
+tail :: CmpNat n 0 ~ 'GT =&gt; ListN n a -&gt; ListN (n-1) a
+tail (ListN (_:xs)) = ListN xs
+tail _ = impossible
+
+take :: forall a (m :: Nat) (n :: Nat) . (KnownNat m, NatWithinBound Int m, m &lt;= n) =&gt; ListN n a -&gt; ListN m a
+take (ListN l) = ListN (Prelude.take n l)
+  where n = natValInt (Proxy :: Proxy m)
+
+drop :: forall a d (m :: Nat) (n :: Nat) . (KnownNat d, NatWithinBound Int d, (n - m) ~ d, m &lt;= n) =&gt; ListN n a -&gt; ListN m a
+drop (ListN l) = ListN (Prelude.drop n l)
+  where n = natValInt (Proxy :: Proxy d)
+
+map :: (a -&gt; b) -&gt; ListN n a -&gt; ListN n b
+map f (ListN l) = ListN (Prelude.map f l)
+
+foldl :: (b -&gt; a -&gt; b) -&gt; b -&gt; ListN n a -&gt; b
+foldl f acc (ListN l) = Prelude.foldl f acc l
+
+zip :: ListN n a -&gt; ListN n b -&gt; ListN n (a,b)
+zip (ListN l1) (ListN l2) = ListN (Prelude.zip l1 l2)
+
+zip3 :: ListN n a -&gt; ListN n b -&gt; ListN n c -&gt; ListN n (a,b,c)
+zip3 (ListN x1) (ListN x2) (ListN x3) = ListN (loop x1 x2 x3)
+  where loop (l1:l1s) (l2:l2s) (l3:l3s) = (l1,l2,l3) : loop l1s l2s l3s
+        loop []       _        _        = []
+        loop _        _        _        = impossible
+
+zip4 :: ListN n a -&gt; ListN n b -&gt; ListN n c -&gt; ListN n d -&gt; ListN n (a,b,c,d)
+zip4 (ListN x1) (ListN x2) (ListN x3) (ListN x4) = ListN (loop x1 x2 x3 x4)
+  where loop (l1:l1s) (l2:l2s) (l3:l3s) (l4:l4s) = (l1,l2,l3,l4) : loop l1s l2s l3s l4s
+        loop []       _        _        _        = []
+        loop _        _        _        _        = impossible
+
+zip5 :: ListN n a -&gt; ListN n b -&gt; ListN n c -&gt; ListN n d -&gt; ListN n e -&gt; ListN n (a,b,c,d,e)
+zip5 (ListN x1) (ListN x2) (ListN x3) (ListN x4) (ListN x5) = ListN (loop x1 x2 x3 x4 x5)
+  where loop (l1:l1s) (l2:l2s) (l3:l3s) (l4:l4s) (l5:l5s) = (l1,l2,l3,l4,l5) : loop l1s l2s l3s l4s l5s
+        loop []       _        _        _        _        = []
+        loop _        _        _        _        _        = impossible
+
+zipWith :: (a -&gt; b -&gt; x) -&gt; ListN n a -&gt; ListN n b -&gt; ListN n x
+zipWith f (ListN (v1:vs)) (ListN (w1:ws)) = ListN (f v1 w1 : unListN (zipWith f (ListN vs) (ListN ws)))
+zipWith _ (ListN [])       _ = ListN []
+zipWith _ _                _ = impossible
+
+zipWith3 :: (a -&gt; b -&gt; c -&gt; x)
+         -&gt; ListN n a
+         -&gt; ListN n b
+         -&gt; ListN n c
+         -&gt; ListN n x
+zipWith3 f (ListN (v1:vs)) (ListN (w1:ws)) (ListN (x1:xs)) =
+    ListN (f v1 w1 x1 : unListN (zipWith3 f (ListN vs) (ListN ws) (ListN xs)))
+zipWith3 _ (ListN []) _       _ = ListN []
+zipWith3 _ _          _       _ = impossible
+
+zipWith4 :: (a -&gt; b -&gt; c -&gt; d -&gt; x)
+         -&gt; ListN n a
+         -&gt; ListN n b
+         -&gt; ListN n c
+         -&gt; ListN n d
+         -&gt; ListN n x
+zipWith4 f (ListN (v1:vs)) (ListN (w1:ws)) (ListN (x1:xs)) (ListN (y1:ys)) =
+    ListN (f v1 w1 x1 y1 : unListN (zipWith4 f (ListN vs) (ListN ws) (ListN xs) (ListN ys)))
+zipWith4 _ (ListN []) _       _       _ = ListN []
+zipWith4 _ _          _       _       _ = impossible
+
+zipWith5 :: (a -&gt; b -&gt; c -&gt; d -&gt; e -&gt; x)
+         -&gt; ListN n a
+         -&gt; ListN n b
+         -&gt; ListN n c
+         -&gt; ListN n d
+         -&gt; ListN n e
+         -&gt; ListN n x
+zipWith5 f (ListN (v1:vs)) (ListN (w1:ws)) (ListN (x1:xs)) (ListN (y1:ys)) (ListN (z1:zs)) =
+    ListN (f v1 w1 x1 y1 z1 : unListN (zipWith5 f (ListN vs) (ListN ws) (ListN xs) (ListN ys) (ListN zs)))
+zipWith5 _ (ListN []) _       _       _       _ = ListN []
+zipWith5 _ _          _       _       _       _ = impossible
+</span></pre></body></html>

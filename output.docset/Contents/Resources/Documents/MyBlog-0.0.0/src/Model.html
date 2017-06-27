@@ -1,0 +1,21 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css"></link><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE EmptyDataDecls             #-}</span><span>
+</span><a href="../MyBlog-0.0.0/src/Model.html#line-2" name="line-2"></a><span class="hs-pragma">{-# LANGUAGE FlexibleInstances          #-}</span><span>
+</span><a href="../MyBlog-0.0.0/src/Model.html#line-3" name="line-3"></a><span class="hs-pragma">{-# LANGUAGE GADTs                      #-}</span><span>
+</span><a href="../MyBlog-0.0.0/src/Model.html#line-4" name="line-4"></a><span class="hs-pragma">{-# LANGUAGE GeneralizedNewtypeDeriving #-}</span><span>
+</span><a href="../MyBlog-0.0.0/src/Model.html#line-5" name="line-5"></a><span class="hs-pragma">{-# LANGUAGE MultiParamTypeClasses      #-}</span><span>
+</span><a href="../MyBlog-0.0.0/src/Model.html#line-6" name="line-6"></a><span class="hs-pragma">{-# LANGUAGE NoImplicitPrelude          #-}</span><span>
+</span><a href="../MyBlog-0.0.0/src/Model.html#line-7" name="line-7"></a><span class="hs-pragma">{-# LANGUAGE OverloadedStrings          #-}</span><span>
+</span><a href="../MyBlog-0.0.0/src/Model.html#line-8" name="line-8"></a><span class="hs-pragma">{-# LANGUAGE TemplateHaskell            #-}</span><span>
+</span><a href="../MyBlog-0.0.0/src/Model.html#line-9" name="line-9"></a><span class="hs-pragma">{-# LANGUAGE TypeFamilies               #-}</span><span>
+</span><a href="../MyBlog-0.0.0/src/Model.html#line-10" name="line-10"></a><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Model</span><span> </span><span class="hs-keyword">where</span><span>
+</span><a href="../MyBlog-0.0.0/src/Model.html#line-11" name="line-11"></a><span>
+</span><a href="../MyBlog-0.0.0/src/Model.html#line-12" name="line-12"></a><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">ClassyPrelude</span><span class="hs-operator">.</span><span class="hs-identifier">Yesod</span><span>
+</span><a href="../MyBlog-0.0.0/src/Model.html#line-13" name="line-13"></a><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Database</span><span class="hs-operator">.</span><span class="hs-identifier">Persist</span><span class="hs-operator">.</span><span class="hs-identifier">Quasi</span><span>
+</span><a href="../MyBlog-0.0.0/src/Model.html#line-14" name="line-14"></a><span>
+</span><a href="../MyBlog-0.0.0/src/Model.html#line-15" name="line-15"></a><span class="hs-comment">-- You can define all of your database entities in the entities file.</span><span>
+</span><a href="../MyBlog-0.0.0/src/Model.html#line-16" name="line-16"></a><span class="hs-comment">-- You can find more information on persistent and how to declare entities</span><span>
+</span><a href="../MyBlog-0.0.0/src/Model.html#line-17" name="line-17"></a><span class="hs-comment">-- at:</span><span>
+</span><a href="../MyBlog-0.0.0/src/Model.html#line-18" name="line-18"></a><span class="hs-comment">-- http://www.yesodweb.com/book/persistent/</span><span>
+</span><a href="../MyBlog-0.0.0/src/Model.html#line-19" name="line-19"></a><span class="hs-identifier hs-var">share</span><span> </span><span class="hs-special">[</span><span class="hs-identifier hs-var">mkPersist</span><span> </span><span class="hs-identifier hs-var">sqlSettings</span><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-var">mkMigrate</span><span> </span><span class="hs-string">&quot;migrateAll&quot;</span><span class="hs-special">]</span><span>
+</span><a href="../MyBlog-0.0.0/src/Model.html#line-20" name="line-20"></a><span>    </span><span class="hs-operator hs-var">$</span><span class="hs-special">(</span><span class="hs-identifier hs-var">persistFileWith</span><span> </span><span class="hs-identifier hs-var">lowerCaseSettings</span><span> </span><span class="hs-string">&quot;config/models&quot;</span><span class="hs-special">)</span><span>
+</span><a href="../MyBlog-0.0.0/src/Model.html#line-21" name="line-21"></a></pre></body></html>

@@ -1,0 +1,197 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css"></link><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE CPP #-}</span><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-2" name="line-2"></a><span class="hs-pragma">{-# LANGUAGE MultiParamTypeClasses #-}</span><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-3" name="line-3"></a><span class="hs-pragma">{-# LANGUAGE RecordWildCards #-}</span><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-4" name="line-4"></a><span class="hs-cpp">#if __GLASGOW_HASKELL__ &gt;= 800</span><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-5" name="line-5"></a><span class="hs-pragma">{-# LANGUAGE TemplateHaskellQuotes #-}</span><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-6" name="line-6"></a><span class="hs-cpp">#else</span><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-7" name="line-7"></a><span class="hs-pragma">{-# LANGUAGE TemplateHaskell #-}</span><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-8" name="line-8"></a><span class="hs-cpp">#endif</span><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-9" name="line-9"></a><span class="hs-cpp">#if __GLASGOW_HASKELL__ &gt;= 702</span><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-10" name="line-10"></a><span class="hs-pragma">{-# LANGUAGE Trustworthy #-}</span><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-11" name="line-11"></a><span class="hs-cpp">#endif</span><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-12" name="line-12"></a><span class="hs-pragma">{-# LANGUAGE TypeFamilies #-}</span><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-13" name="line-13"></a><span class="hs-pragma">{-# LANGUAGE ViewPatterns #-}</span><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-14" name="line-14"></a><span class="hs-pragma">{-# OPTIONS -Wall #-}</span><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-15" name="line-15"></a><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-16" name="line-16"></a><span class="hs-comment">{-|
+Module:      Data.Vector.Unboxed.Deriving
+Copyright:   © 2012−2015 Liyang HU
+License:     BSD3
+Maintainer:  vector-th-unbox@liyang.hu
+Stability:   experimental
+Portability: non-portable
+-}</span><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-24" name="line-24"></a><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-25" name="line-25"></a><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Data</span><span class="hs-operator">.</span><span class="hs-identifier">Vector</span><span class="hs-operator">.</span><span class="hs-identifier">Unboxed</span><span class="hs-operator">.</span><span class="hs-identifier">Deriving</span><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-26" name="line-26"></a><span>    </span><span class="hs-special">(</span><span> </span><span class="hs-comment">-- $usage</span><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-27" name="line-27"></a><span>      </span><a href="../vector-th-unbox-0.2.1.6/Data.Vector.Unboxed.Deriving.html#derivingUnbox"><span class="hs-identifier hs-var">derivingUnbox</span></a><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-28" name="line-28"></a><span>    </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-29" name="line-29"></a><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-30" name="line-30"></a><span class="hs-cpp">#if !MIN_VERSION_base(4,8,0)</span><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-31" name="line-31"></a><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Control</span><span class="hs-operator">.</span><span class="hs-identifier">Applicative</span><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-32" name="line-32"></a><span class="hs-cpp">#endif</span><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-33" name="line-33"></a><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Control</span><span class="hs-operator">.</span><span class="hs-identifier">Arrow</span><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-34" name="line-34"></a><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Control</span><span class="hs-operator">.</span><span class="hs-identifier">Monad</span><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-35" name="line-35"></a><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Data</span><span class="hs-operator">.</span><span class="hs-identifier">Char</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-var">isAlphaNum</span><span class="hs-special">)</span><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-36" name="line-36"></a><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-identifier">Data</span><span class="hs-operator">.</span><span class="hs-identifier">Vector</span><span class="hs-operator">.</span><span class="hs-identifier">Generic</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="hs-identifier">G</span><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-37" name="line-37"></a><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-identifier">Data</span><span class="hs-operator">.</span><span class="hs-identifier">Vector</span><span class="hs-operator">.</span><span class="hs-identifier">Generic</span><span class="hs-operator">.</span><span class="hs-identifier">Mutable</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="hs-identifier">M</span><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-38" name="line-38"></a><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Data</span><span class="hs-operator">.</span><span class="hs-identifier">Vector</span><span class="hs-operator">.</span><span class="hs-identifier">Unboxed</span><span class="hs-operator">.</span><span class="hs-identifier">Base</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">MVector</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-type">Vector</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-type">Unbox</span><span class="hs-special">)</span><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-39" name="line-39"></a><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Language</span><span class="hs-operator">.</span><span class="hs-identifier">Haskell</span><span class="hs-operator">.</span><span class="hs-identifier">TH</span><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-40" name="line-40"></a><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-41" name="line-41"></a><span class="hs-comment">-- Create a @Pat@ bound to the given name and an @Exp@ for said binding.</span><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-42" name="line-42"></a><span class="hs-identifier">newPatExp</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-identifier hs-type">String</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier hs-type">Q</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">Pat</span><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-type">Exp</span><span class="hs-special">)</span><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-43" name="line-43"></a><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#newPatExp" name="newPatExp"><a href="../vector-th-unbox-0.2.1.6/Data.Vector.Unboxed.Deriving.html#newPatExp"><span class="hs-identifier">newPatExp</span></a></a><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier hs-var">fmap</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-var">VarP</span><span> </span><span class="hs-operator hs-var">&amp;&amp;&amp;</span><span> </span><span class="hs-identifier hs-var">VarE</span><span class="hs-special">)</span><span> </span><span class="hs-operator hs-var">.</span><span> </span><span class="hs-identifier hs-var">newName</span><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-44" name="line-44"></a><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-45" name="line-45"></a><span class="hs-keyword">data</span><span> </span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#Common" name="Common"><a href="../vector-th-unbox-0.2.1.6/Data.Vector.Unboxed.Deriving.html#Common"><span class="hs-identifier">Common</span></a></a><span> </span><span class="hs-glyph">=</span><span> </span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#Common" name="Common"><a href="../vector-th-unbox-0.2.1.6/Data.Vector.Unboxed.Deriving.html#Common"><span class="hs-identifier">Common</span></a></a><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-46" name="line-46"></a><span>    </span><span class="hs-special">{</span><span> </span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#mvName" name="mvName"><a href="../vector-th-unbox-0.2.1.6/Data.Vector.Unboxed.Deriving.html#mvName"><span class="hs-identifier">mvName</span></a></a><span class="hs-special">,</span><span> </span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#vName" name="vName"><a href="../vector-th-unbox-0.2.1.6/Data.Vector.Unboxed.Deriving.html#vName"><span class="hs-identifier">vName</span></a></a><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-identifier hs-type">Name</span><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-47" name="line-47"></a><span>    </span><span class="hs-special">,</span><span> </span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#i" name="i"><a href="../vector-th-unbox-0.2.1.6/Data.Vector.Unboxed.Deriving.html#i"><span class="hs-identifier">i</span></a></a><span class="hs-special">,</span><span> </span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#n" name="n"><a href="../vector-th-unbox-0.2.1.6/Data.Vector.Unboxed.Deriving.html#n"><span class="hs-identifier">n</span></a></a><span class="hs-special">,</span><span> </span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#mv" name="mv"><a href="../vector-th-unbox-0.2.1.6/Data.Vector.Unboxed.Deriving.html#mv"><span class="hs-identifier">mv</span></a></a><span class="hs-special">,</span><span> </span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#mv%27" name="mv%27"><a href="../vector-th-unbox-0.2.1.6/Data.Vector.Unboxed.Deriving.html#mv%27"><span class="hs-identifier">mv'</span></a></a><span class="hs-special">,</span><span> </span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#v" name="v"><a href="../vector-th-unbox-0.2.1.6/Data.Vector.Unboxed.Deriving.html#v"><span class="hs-identifier">v</span></a></a><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">Pat</span><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-type">Exp</span><span class="hs-special">)</span><span> </span><span class="hs-special">}</span><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-48" name="line-48"></a><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-49" name="line-49"></a><span class="hs-identifier">common</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-identifier hs-type">String</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier hs-type">Q</span><span> </span><a href="../vector-th-unbox-0.2.1.6/Data.Vector.Unboxed.Deriving.html#Common"><span class="hs-identifier hs-type">Common</span></a><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-50" name="line-50"></a><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#common" name="common"><a href="../vector-th-unbox-0.2.1.6/Data.Vector.Unboxed.Deriving.html#common"><span class="hs-identifier">common</span></a></a><span> </span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#local-6989586621679052650" name="local-6989586621679052650"><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#local-6989586621679052650"><span class="hs-identifier">name</span></a></a><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-51" name="line-51"></a><span>    </span><span class="hs-comment">-- A bit looser than “Haskell 2010: §2.4 Identifiers and Operators”…</span><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-52" name="line-52"></a><span>    </span><span class="hs-keyword">let</span><span> </span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#local-6989586621679052651" name="local-6989586621679052651"><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#local-6989586621679052651"><span class="hs-identifier">valid</span></a></a><span> </span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#local-6989586621679052652" name="local-6989586621679052652"><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#local-6989586621679052652"><span class="hs-identifier">c</span></a></a><span> </span><span class="hs-glyph">=</span><span> </span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#local-6989586621679052652"><span class="hs-identifier hs-var">c</span></a><span> </span><span class="hs-operator hs-var">==</span><span> </span><span class="hs-char">'_'</span><span> </span><span class="hs-operator hs-var">||</span><span> </span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#local-6989586621679052652"><span class="hs-identifier hs-var">c</span></a><span> </span><span class="hs-operator hs-var">==</span><span> </span><span class="hs-char">'\''</span><span> </span><span class="hs-operator hs-var">||</span><span> </span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#local-6989586621679052652"><span class="hs-identifier hs-var">c</span></a><span> </span><span class="hs-operator hs-var">==</span><span> </span><span class="hs-char">'#'</span><span> </span><span class="hs-operator hs-var">||</span><span> </span><span class="hs-identifier hs-var">isAlphaNum</span><span> </span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#local-6989586621679052652"><span class="hs-identifier hs-var">c</span></a><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-53" name="line-53"></a><span>    </span><span class="hs-identifier hs-var">unless</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-var">all</span><span> </span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#local-6989586621679052651"><span class="hs-identifier hs-var">valid</span></a><span> </span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#local-6989586621679052650"><span class="hs-identifier hs-var">name</span></a><span class="hs-special">)</span><span> </span><span class="hs-operator hs-var">$</span><span> </span><span class="hs-keyword">do</span><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-54" name="line-54"></a><span>        </span><span class="hs-identifier hs-var">fail</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-var">show</span><span> </span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#local-6989586621679052650"><span class="hs-identifier hs-var">name</span></a><span> </span><span class="hs-operator hs-var">++</span><span> </span><span class="hs-string">&quot; is not a valid constructor suffix!&quot;</span><span class="hs-special">)</span><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-55" name="line-55"></a><span>    </span><span class="hs-keyword">let</span><span> </span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#local-6989586621679058060" name="local-6989586621679058060"><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#local-6989586621679058060"><span class="hs-identifier">mvName</span></a></a><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier hs-var">mkName</span><span> </span><span class="hs-special">(</span><span class="hs-string">&quot;MV_&quot;</span><span> </span><span class="hs-operator hs-var">++</span><span> </span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#local-6989586621679052650"><span class="hs-identifier hs-var">name</span></a><span class="hs-special">)</span><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-56" name="line-56"></a><span>    </span><span class="hs-keyword">let</span><span> </span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#local-6989586621679058061" name="local-6989586621679058061"><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#local-6989586621679058061"><span class="hs-identifier">vName</span></a></a><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier hs-var">mkName</span><span> </span><span class="hs-special">(</span><span class="hs-string">&quot;V_&quot;</span><span> </span><span class="hs-operator hs-var">++</span><span> </span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#local-6989586621679052650"><span class="hs-identifier hs-var">name</span></a><span class="hs-special">)</span><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-57" name="line-57"></a><span>    </span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#local-6989586621679058062" name="local-6989586621679058062"><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#local-6989586621679058062"><span class="hs-identifier">i</span></a></a><span> </span><span class="hs-glyph">&lt;-</span><span> </span><a href="../vector-th-unbox-0.2.1.6/Data.Vector.Unboxed.Deriving.html#newPatExp"><span class="hs-identifier hs-var">newPatExp</span></a><span> </span><span class="hs-string">&quot;idx&quot;</span><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-58" name="line-58"></a><span>    </span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#local-6989586621679058063" name="local-6989586621679058063"><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#local-6989586621679058063"><span class="hs-identifier">n</span></a></a><span> </span><span class="hs-glyph">&lt;-</span><span> </span><a href="../vector-th-unbox-0.2.1.6/Data.Vector.Unboxed.Deriving.html#newPatExp"><span class="hs-identifier hs-var">newPatExp</span></a><span> </span><span class="hs-string">&quot;len&quot;</span><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-59" name="line-59"></a><span>    </span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#local-6989586621679058073" name="local-6989586621679058073"><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#local-6989586621679058073"><span class="hs-identifier">mv</span></a></a><span>  </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-identifier hs-var">first</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-var">ConP</span><span> </span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#local-6989586621679058060"><span class="hs-identifier hs-var">mvName</span></a><span> </span><span class="hs-operator hs-var">.</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">:</span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-operator hs-var">&lt;$&gt;</span><span> </span><a href="../vector-th-unbox-0.2.1.6/Data.Vector.Unboxed.Deriving.html#newPatExp"><span class="hs-identifier hs-var">newPatExp</span></a><span> </span><span class="hs-string">&quot;mvec&quot;</span><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-60" name="line-60"></a><span>    </span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#local-6989586621679058074" name="local-6989586621679058074"><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#local-6989586621679058074"><span class="hs-identifier">mv'</span></a></a><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-identifier hs-var">first</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-var">ConP</span><span> </span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#local-6989586621679058060"><span class="hs-identifier hs-var">mvName</span></a><span> </span><span class="hs-operator hs-var">.</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">:</span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-operator hs-var">&lt;$&gt;</span><span> </span><a href="../vector-th-unbox-0.2.1.6/Data.Vector.Unboxed.Deriving.html#newPatExp"><span class="hs-identifier hs-var">newPatExp</span></a><span> </span><span class="hs-string">&quot;mvec'&quot;</span><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-61" name="line-61"></a><span>    </span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#local-6989586621679058075" name="local-6989586621679058075"><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#local-6989586621679058075"><span class="hs-identifier">v</span></a></a><span>   </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-identifier hs-var">first</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-var">ConP</span><span> </span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#local-6989586621679058061"><span class="hs-identifier hs-var">vName</span></a><span>  </span><span class="hs-operator hs-var">.</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">:</span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">)</span><span class="hs-special">)</span><span> </span><span class="hs-operator hs-var">&lt;$&gt;</span><span> </span><a href="../vector-th-unbox-0.2.1.6/Data.Vector.Unboxed.Deriving.html#newPatExp"><span class="hs-identifier hs-var">newPatExp</span></a><span> </span><span class="hs-string">&quot;vec&quot;</span><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-62" name="line-62"></a><span>    </span><span class="hs-identifier hs-var">return</span><span> </span><a href="../vector-th-unbox-0.2.1.6/Data.Vector.Unboxed.Deriving.html#Common"><span class="hs-identifier hs-var">Common</span></a><span> </span><span class="hs-special">{</span><span class="hs-glyph">..</span><span class="hs-special">}</span><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-63" name="line-63"></a><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-64" name="line-64"></a><span class="hs-comment">-- Turn any 'Name' into a capturable one.</span><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-65" name="line-65"></a><span class="hs-identifier">capture</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-identifier hs-type">Name</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier hs-type">Name</span><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-66" name="line-66"></a><span class="hs-cpp">#if __GLASGOW_HASKELL__ == 704</span><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-67" name="line-67"></a><span class="hs-identifier">capture</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier">mkName</span><span> </span><span class="hs-operator">.</span><span> </span><span class="hs-identifier">nameBase</span><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-68" name="line-68"></a><span class="hs-cpp">#else</span><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-69" name="line-69"></a><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#capture" name="capture"><a href="../vector-th-unbox-0.2.1.6/Data.Vector.Unboxed.Deriving.html#capture"><span class="hs-identifier">capture</span></a></a><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier hs-var">id</span><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-70" name="line-70"></a><span class="hs-cpp">#endif</span><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-71" name="line-71"></a><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-72" name="line-72"></a><span class="hs-identifier">liftE</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-identifier hs-type">Exp</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier hs-type">Exp</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier hs-type">Exp</span><span>
+</span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#line-73" name="line-73"></a><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#liftE" name="liftE"><a href="../vector-th-unbox-0.2.1.6/Data.Vector.Unboxed.Deriving.html#liftE"><span class="hs-identifier">liftE</span></a></a><span> </span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#local-6989586621679058076" name="local-6989586621679058076"><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#local-6989586621679058076"><span class="hs-identifier">e</span></a></a><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier hs-var">InfixE</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-var">Just</span><span> </span><a href="../vector-th-unbox-0.2.1.6/src/Data.Vector.Unboxed.Deriving.html#local-6989586621679058076"><span class="hs-identifier hs-var">e</span></a><span class="hs-special">)</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-var">VarE</span><span> </span><span class="hs-char">'liftM) . Just
+
+-- Create a wrapper for the given function with the same 'nameBase', given
+-- a list of argument bindings and expressions in terms of said bindings.
+-- A final coercion (@Exp → Exp@) is applied to the body of the function.
+-- Complimentary @INLINE@ pragma included.
+wrap :: Name -&gt; [(Pat, Exp)] -&gt; (Exp -&gt; Exp) -&gt; [Dec]
+wrap fun (unzip -&gt; (pats, exps)) coerce = [inline, method] where
+    name = capture fun
+#if MIN_VERSION_template_haskell(2,8,0)
+    inline = PragmaD (InlineP name Inline FunLike AllPhases)
+#else
+    inline = PragmaD ( InlineP name (InlineSpec True False Nothing) )
+#endif
+    body = coerce $ foldl AppE (VarE fun) exps
+    method = FunD name [Clause pats (NormalB body) []]
+
+{-| Let's consider a more complex example: suppose we want an @Unbox@
+instance for @Maybe a@. We could encode this using the pair @(Bool, a)@,
+with the boolean indicating whether we have @Nothing@ or @Just@ something.
+This encoding requires a dummy value in the @Nothing@ case, necessitating an
+additional &lt;http://hackage.haskell.org/package/data-default/docs/Data-Default.html#t:Default Default&gt;
+constraint. Thus:
+
+&gt;derivingUnbox &quot;Maybe&quot;
+&gt;    [t| ∀ a. (Default a, Unbox a) ⇒ Maybe a → (Bool, a) |]
+&gt;    [| maybe (False, def) (\ x → (True, x)) |]
+&gt;    [| \ (b, x) → if b then Just x else Nothing |]
+-}
+derivingUnbox
+    :: String   -- ^ Unique constructor suffix for the MVector and Vector data families
+    -&gt; TypeQ    -- ^ Quotation of the form @[t| /ctxt/ ⇒ src → rep |]@
+    -&gt; ExpQ     -- ^ Quotation of an expression of type @src → rep@
+    -&gt; ExpQ     -- ^ Quotation of an expression of type @rep → src@
+    -&gt; DecsQ    -- ^ Declarations to be spliced for the derived Unbox instance
+derivingUnbox name argsQ toRepQ fromRepQ = do
+    Common {..} &lt;- common name
+    toRep &lt;- toRepQ
+    fromRep &lt;- fromRepQ
+    a &lt;- second (AppE toRep) &lt;$&gt; newPatExp &quot;val&quot;
+    args &lt;- argsQ
+    (cxts, typ, rep) &lt;- case args of
+        ForallT _ cxts (ArrowT `AppT` typ `AppT` rep) -&gt; return (cxts, typ, rep)
+        ArrowT `AppT` typ `AppT` rep -&gt; return ([], typ, rep)
+        _ -&gt; fail &quot;Expecting a type of the form: cxts =&gt; typ -&gt; rep&quot;
+
+    let s = VarT (mkName &quot;s&quot;)
+#if MIN_VERSION_template_haskell(2,11,0)
+    let lazy = Bang NoSourceUnpackedness NoSourceStrictness
+# define MAYBE_KIND Nothing
+# define MAYBE_OVERLAP Nothing
+#else
+    let lazy = NotStrict
+# define MAYBE_KIND
+# define MAYBE_OVERLAP
+#endif
+    let newtypeMVector = NewtypeInstD [] ''MVector [s, typ] MAYBE_KIND
+            (NormalC mvName [(lazy, ConT ''MVector `AppT` s `AppT` rep)]) []
+    let mvCon = ConE mvName
+    let instanceMVector = InstanceD MAYBE_OVERLAP cxts
+            (ConT ''M.MVector `AppT` ConT ''MVector `AppT` typ) $ concat
+            [ wrap 'M.basicLength           [mv]        id
+            , wrap 'M.basicUnsafeSlice      [i, n, mv]  (AppE mvCon)
+            , wrap 'M.basicOverlaps         [mv, mv']   id
+            , wrap 'M.basicUnsafeNew        [n]         (liftE mvCon)
+#if MIN_VERSION_vector(0,11,0)
+            , wrap 'M.basicInitialize       [mv]        id
+#endif
+            , wrap 'M.basicUnsafeReplicate  [n, a]      (liftE mvCon)
+            , wrap 'M.basicUnsafeRead       [mv, i]     (liftE fromRep)
+            , wrap 'M.basicUnsafeWrite      [mv, i, a]  id
+            , wrap 'M.basicClear            [mv]        id
+            , wrap 'M.basicSet              [mv, a]     id
+            , wrap 'M.basicUnsafeCopy       [mv, mv']   id
+            , wrap 'M.basicUnsafeMove       [mv, mv']   id
+            , wrap 'M.basicUnsafeGrow       [mv, n]     (liftE mvCon) ]
+
+    let newtypeVector = NewtypeInstD [] ''Vector [typ] MAYBE_KIND
+            (NormalC vName [(lazy, ConT ''Vector `AppT` rep)]) []
+    let vCon  = ConE vName
+    let instanceVector = InstanceD MAYBE_OVERLAP cxts
+            (ConT ''G.Vector `AppT` ConT ''Vector `AppT` typ) $ concat
+            [ wrap 'G.basicUnsafeFreeze     [mv]        (liftE vCon)
+            , wrap 'G.basicUnsafeThaw       [v]         (liftE mvCon)
+            , wrap 'G.basicLength           [v]         id
+            , wrap 'G.basicUnsafeSlice      [i, n, v]   (AppE vCon)
+            , wrap 'G.basicUnsafeIndexM     [v, i]      (liftE fromRep)
+            , wrap 'G.basicUnsafeCopy       [mv, v]     id
+            , wrap 'G.elemseq               [v, a]      id ]
+
+    return [ InstanceD MAYBE_OVERLAP cxts (ConT ''Unbox `AppT` typ) []
+        , newtypeMVector, instanceMVector
+        , newtypeVector, instanceVector ]
+
+#undef __GLASGOW_HASKELL__
+{-$usage
+
+Writing @Unbox@ instances for new data types is tedious and formulaic. More
+often than not, there is a straightforward mapping of the new type onto some
+existing one already imbued with an @Unbox@ instance. The
+&lt;http://hackage.haskell.org/package/vector/docs/Data-Vector-Unboxed.html example&gt;
+from the @vector@ package represents @Complex a@ as pairs @(a, a)@. Using
+'derivingUnbox', we can define the same instances much more succinctly:
+
+&gt;derivingUnbox &quot;Complex&quot;
+&gt;    [t| ∀ a. (Unbox a) ⇒ Complex a → (a, a) |]
+&gt;    [| \ (r :+ i) → (r, i) |]
+&gt;    [| \ (r, i) → r :+ i |]
+
+Requires the @MultiParamTypeClasses@, @TemplateHaskell@, @TypeFamilies@ and
+probably the @FlexibleInstances@ @LANGUAGE@ extensions. Note that GHC 7.4
+(but not earlier nor later) needs the 'G.Vector' and 'M.MVector' class
+method names to be in scope in order to define the appropriate instances:
+
+&gt;#if __GLASGOW_HASKELL__ == 704
+&gt;import qualified Data.Vector.Generic
+&gt;import qualified Data.Vector.Generic.Mutable
+&gt;#endif
+
+Consult the &lt;https://github.com/liyang/vector-th-unbox/blob/master/tests/sanity.hs sanity test&gt;
+for a working example.
+
+-}
+
+</span></pre></body></html>

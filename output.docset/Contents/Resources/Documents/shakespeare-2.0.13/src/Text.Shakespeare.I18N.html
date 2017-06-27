@@ -1,0 +1,424 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css"></link><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE TemplateHaskell #-}</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-2" name="line-2"></a><span class="hs-pragma">{-# LANGUAGE TypeFamilies #-}</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-3" name="line-3"></a><span class="hs-pragma">{-# LANGUAGE MultiParamTypeClasses #-}</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-4" name="line-4"></a><span class="hs-pragma">{-# LANGUAGE FlexibleInstances #-}</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-5" name="line-5"></a><span class="hs-pragma">{-# LANGUAGE TypeSynonymInstances #-}</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-6" name="line-6"></a><span class="hs-pragma">{-# LANGUAGE ExistentialQuantification #-}</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-7" name="line-7"></a><span class="hs-pragma">{-# LANGUAGE CPP #-}</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-8" name="line-8"></a><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-9" name="line-9"></a><span class="hs-comment">-----------------------------------------------------------------------------</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-10" name="line-10"></a><span class="hs-comment">-- |</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-11" name="line-11"></a><span class="hs-comment">-- Module      :  Text.Shakespeare.I18N</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-12" name="line-12"></a><span class="hs-comment">-- Copyright   :  2012 Michael Snoyman &lt;michael@snoyman.com&gt;, Jeremy Shaw</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-13" name="line-13"></a><span class="hs-comment">-- License     :  BSD-style (see the LICENSE file in the distribution)</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-14" name="line-14"></a><span class="hs-comment">--</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-15" name="line-15"></a><span class="hs-comment">-- Maintainer  :  Michael Snoyman &lt;michael@snoyman.com&gt;</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-16" name="line-16"></a><span class="hs-comment">-- Stability   :  experimental</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-17" name="line-17"></a><span class="hs-comment">-- Portability :  portable</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-18" name="line-18"></a><span class="hs-comment">--</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-19" name="line-19"></a><span class="hs-comment">-- This module provides a type-based system for providing translations</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-20" name="line-20"></a><span class="hs-comment">-- for text strings.</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-21" name="line-21"></a><span class="hs-comment">--</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-22" name="line-22"></a><span class="hs-comment">-- It is similar in purpose to gettext or Java message bundles.</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-23" name="line-23"></a><span class="hs-comment">--</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-24" name="line-24"></a><span class="hs-comment">-- The core idea is to create simple data type where each constructor</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-25" name="line-25"></a><span class="hs-comment">-- represents a phrase, sentence, paragraph, etc. For example:</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-26" name="line-26"></a><span class="hs-comment">--</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-27" name="line-27"></a><span class="hs-comment">-- &gt; data AppMessages = Hello | Goodbye</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-28" name="line-28"></a><span class="hs-comment">--</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-29" name="line-29"></a><span class="hs-comment">-- The 'RenderMessage' class is used to retrieve the appropriate</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-30" name="line-30"></a><span class="hs-comment">-- translation for a message value:</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-31" name="line-31"></a><span class="hs-comment">--</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-32" name="line-32"></a><span class="hs-comment">-- &gt; class RenderMessage master message where</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-33" name="line-33"></a><span class="hs-comment">-- &gt;   renderMessage :: master  -- ^ type that specifies which set of translations to use</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-34" name="line-34"></a><span class="hs-comment">-- &gt;                 -&gt; [Lang]  -- ^ acceptable languages in descending order of preference</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-35" name="line-35"></a><span class="hs-comment">-- &gt;                 -&gt; message -- ^ message to translate</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-36" name="line-36"></a><span class="hs-comment">-- &gt;                 -&gt; Text</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-37" name="line-37"></a><span class="hs-comment">--</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-38" name="line-38"></a><span class="hs-comment">-- Defining the translation type and providing the 'RenderMessage'</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-39" name="line-39"></a><span class="hs-comment">-- instance in Haskell is not very translator friendly. Instead,</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-40" name="line-40"></a><span class="hs-comment">-- translations are generally provided in external translations</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-41" name="line-41"></a><span class="hs-comment">-- files. Then the 'mkMessage' Template Haskell function is used to</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-42" name="line-42"></a><span class="hs-comment">-- read the external translation files and automatically create the</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-43" name="line-43"></a><span class="hs-comment">-- translation type and the @RenderMessage@ instance.</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-44" name="line-44"></a><span class="hs-comment">--</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-45" name="line-45"></a><span class="hs-comment">-- A full description of using this module to create translations for @Hamlet@ can be found here:</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-46" name="line-46"></a><span class="hs-comment">--</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-47" name="line-47"></a><span class="hs-comment">--  &lt;http://www.yesodweb.com/book/internationalization&gt;</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-48" name="line-48"></a><span class="hs-comment">--</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-49" name="line-49"></a><span class="hs-comment">-- A full description of using the module to create translations for @HSP@ can be found here:</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-50" name="line-50"></a><span class="hs-comment">--</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-51" name="line-51"></a><span class="hs-comment">--  &lt;http://happstack.com/docs/crashcourse/Templates.html#hsp-i18n&gt;</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-52" name="line-52"></a><span class="hs-comment">--</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-53" name="line-53"></a><span class="hs-comment">-- You can also adapt those instructions for use with other systems.</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-54" name="line-54"></a><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Text</span><span class="hs-operator">.</span><span class="hs-identifier">Shakespeare</span><span class="hs-operator">.</span><span class="hs-identifier">I18N</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-55" name="line-55"></a><span>    </span><span class="hs-special">(</span><span> </span><a href="../shakespeare-2.0.13/Text.Shakespeare.I18N.html#mkMessage"><span class="hs-identifier hs-var">mkMessage</span></a><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-56" name="line-56"></a><span>    </span><span class="hs-special">,</span><span> </span><a href="../shakespeare-2.0.13/Text.Shakespeare.I18N.html#mkMessageFor"><span class="hs-identifier hs-var">mkMessageFor</span></a><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-57" name="line-57"></a><span>    </span><span class="hs-special">,</span><span> </span><a href="../shakespeare-2.0.13/Text.Shakespeare.I18N.html#mkMessageVariant"><span class="hs-identifier hs-var">mkMessageVariant</span></a><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-58" name="line-58"></a><span>    </span><span class="hs-special">,</span><span> </span><a href="../shakespeare-2.0.13/Text.Shakespeare.I18N.html#RenderMessage"><span class="hs-identifier hs-type">RenderMessage</span></a><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-59" name="line-59"></a><span>    </span><span class="hs-special">,</span><span> </span><a href="../shakespeare-2.0.13/Text.Shakespeare.I18N.html#ToMessage"><span class="hs-identifier hs-type">ToMessage</span></a><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-60" name="line-60"></a><span>    </span><span class="hs-special">,</span><span> </span><a href="../shakespeare-2.0.13/Text.Shakespeare.I18N.html#SomeMessage"><span class="hs-identifier hs-type">SomeMessage</span></a><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-61" name="line-61"></a><span>    </span><span class="hs-special">,</span><span> </span><a href="../shakespeare-2.0.13/Text.Shakespeare.I18N.html#Lang"><span class="hs-identifier hs-type">Lang</span></a><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-62" name="line-62"></a><span>    </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-63" name="line-63"></a><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-64" name="line-64"></a><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Language</span><span class="hs-operator">.</span><span class="hs-identifier">Haskell</span><span class="hs-operator">.</span><span class="hs-identifier">TH</span><span class="hs-operator">.</span><span class="hs-identifier">Syntax</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-65" name="line-65"></a><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Control</span><span class="hs-operator">.</span><span class="hs-identifier">Applicative</span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="hs-operator hs-var">&lt;$&gt;</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-66" name="line-66"></a><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Control</span><span class="hs-operator">.</span><span class="hs-identifier">Monad</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-var">filterM</span><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-var">forM</span><span class="hs-special">)</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-67" name="line-67"></a><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Data</span><span class="hs-operator">.</span><span class="hs-identifier">Text</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">Text</span><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-var">pack</span><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-var">unpack</span><span class="hs-special">)</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-68" name="line-68"></a><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">System</span><span class="hs-operator">.</span><span class="hs-identifier">Directory</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-69" name="line-69"></a><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Data</span><span class="hs-operator">.</span><span class="hs-identifier">Maybe</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-var">catMaybes</span><span class="hs-special">)</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-70" name="line-70"></a><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Data</span><span class="hs-operator">.</span><span class="hs-identifier">List</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-var">isSuffixOf</span><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-var">sortBy</span><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-var">foldl'</span><span class="hs-special">)</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-71" name="line-71"></a><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-identifier">Data</span><span class="hs-operator">.</span><span class="hs-identifier">Map</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="hs-identifier">Map</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-72" name="line-72"></a><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-identifier">Data</span><span class="hs-operator">.</span><span class="hs-identifier">ByteString</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="hs-identifier">S</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-73" name="line-73"></a><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Data</span><span class="hs-operator">.</span><span class="hs-identifier">Text</span><span class="hs-operator">.</span><span class="hs-identifier">Encoding</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-var">decodeUtf8</span><span class="hs-special">)</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-74" name="line-74"></a><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Data</span><span class="hs-operator">.</span><span class="hs-identifier">Char</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-var">isSpace</span><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-var">toLower</span><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-var">toUpper</span><span class="hs-special">)</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-75" name="line-75"></a><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Data</span><span class="hs-operator">.</span><span class="hs-identifier">Ord</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-var">comparing</span><span class="hs-special">)</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-76" name="line-76"></a><span class="hs-keyword">import</span><span> </span><a href="../shakespeare-2.0.13/Text.Shakespeare.Base.html"><span class="hs-identifier">Text</span><span class="hs-operator">.</span><span class="hs-identifier">Shakespeare</span><span class="hs-operator">.</span><span class="hs-identifier">Base</span></a><span> </span><span class="hs-special">(</span><a href="../shakespeare-2.0.13/Text.Shakespeare.Base.html#Deref"><span class="hs-identifier hs-type">Deref</span></a><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><a href="../shakespeare-2.0.13/Text.Shakespeare.Base.html#Ident"><span class="hs-identifier hs-type">Ident</span></a><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><a href="../shakespeare-2.0.13/Text.Shakespeare.Base.html#parseHash"><span class="hs-identifier hs-var">parseHash</span></a><span class="hs-special">,</span><span> </span><a href="../shakespeare-2.0.13/Text.Shakespeare.Base.html#derefToExp"><span class="hs-identifier hs-var">derefToExp</span></a><span class="hs-special">)</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-77" name="line-77"></a><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Text</span><span class="hs-operator">.</span><span class="hs-identifier">ParserCombinators</span><span class="hs-operator">.</span><span class="hs-identifier">Parsec</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-var">parse</span><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-var">many</span><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-var">eof</span><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-var">many1</span><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-var">noneOf</span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="hs-operator hs-var">&lt;|&gt;</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-78" name="line-78"></a><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Control</span><span class="hs-operator">.</span><span class="hs-identifier">Arrow</span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="hs-operator hs-var">***</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-79" name="line-79"></a><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Data</span><span class="hs-operator">.</span><span class="hs-identifier">Monoid</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-var">mempty</span><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-var">mappend</span><span class="hs-special">)</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-80" name="line-80"></a><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><span class="hs-identifier">Data</span><span class="hs-operator">.</span><span class="hs-identifier">Text</span><span> </span><span class="hs-keyword">as</span><span> </span><span class="hs-identifier">T</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-81" name="line-81"></a><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Data</span><span class="hs-operator">.</span><span class="hs-identifier">String</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">IsString</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-var">fromString</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-82" name="line-82"></a><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-83" name="line-83"></a><span class="hs-comment">-- | 'ToMessage' is used to convert the value inside #{ } to 'Text'</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-84" name="line-84"></a><span class="hs-comment">--</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-85" name="line-85"></a><span class="hs-comment">-- The primary purpose of this class is to allow the value in #{ } to</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-86" name="line-86"></a><span class="hs-comment">-- be a 'String' or 'Text' rather than forcing it to always be 'Text'.</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-87" name="line-87"></a><span class="hs-keyword">class</span><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#ToMessage" name="ToMessage"><a href="../shakespeare-2.0.13/Text.Shakespeare.I18N.html#ToMessage"><span class="hs-identifier">ToMessage</span></a></a><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182863" name="local-6989586621679182863"><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182863"><span class="hs-identifier">a</span></a></a><span> </span><span class="hs-keyword">where</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-88" name="line-88"></a><span>    </span><span class="hs-identifier">toMessage</span><span> </span><span class="hs-glyph">::</span><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182863"><span class="hs-identifier hs-type">a</span></a><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier hs-type">Text</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-89" name="line-89"></a><span class="hs-keyword">instance</span><span> </span><a href="../shakespeare-2.0.13/Text.Shakespeare.I18N.html#ToMessage"><span class="hs-identifier hs-type">ToMessage</span></a><span> </span><span class="hs-identifier hs-type">Text</span><span> </span><span class="hs-keyword">where</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-90" name="line-90"></a><span>    </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-8214565720323957746" name="local-8214565720323957746"><a href="../shakespeare-2.0.13/Text.Shakespeare.I18N.html#toMessage"><span class="hs-identifier">toMessage</span></a></a><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier hs-var">id</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-91" name="line-91"></a><span class="hs-keyword">instance</span><span> </span><a href="../shakespeare-2.0.13/Text.Shakespeare.I18N.html#ToMessage"><span class="hs-identifier hs-type">ToMessage</span></a><span> </span><span class="hs-identifier hs-type">String</span><span> </span><span class="hs-keyword">where</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-92" name="line-92"></a><span>    </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-8214565720323957746" name="local-8214565720323957746"><a href="../shakespeare-2.0.13/Text.Shakespeare.I18N.html#toMessage"><span class="hs-identifier">toMessage</span></a></a><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier hs-var">Data</span><span class="hs-operator hs-var">.</span><span class="hs-identifier hs-var">Text</span><span class="hs-operator hs-var">.</span><span class="hs-identifier hs-var">pack</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-93" name="line-93"></a><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-94" name="line-94"></a><span class="hs-comment">-- | the 'RenderMessage' is used to provide translations for a message types</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-95" name="line-95"></a><span class="hs-comment">--</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-96" name="line-96"></a><span class="hs-comment">-- The 'master' argument exists so that it is possible to provide more</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-97" name="line-97"></a><span class="hs-comment">-- than one set of translations for a 'message' type. This is useful</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-98" name="line-98"></a><span class="hs-comment">-- if a library provides a default set of translations, but the user</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-99" name="line-99"></a><span class="hs-comment">-- of the library wants to provide a different set of translations.</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-100" name="line-100"></a><span class="hs-keyword">class</span><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#RenderMessage" name="RenderMessage"><a href="../shakespeare-2.0.13/Text.Shakespeare.I18N.html#RenderMessage"><span class="hs-identifier">RenderMessage</span></a></a><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182861" name="local-6989586621679182861"><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182861"><span class="hs-identifier">master</span></a></a><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182862" name="local-6989586621679182862"><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182862"><span class="hs-identifier">message</span></a></a><span> </span><span class="hs-keyword">where</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-101" name="line-101"></a><span>    </span><span class="hs-identifier">renderMessage</span><span> </span><span class="hs-glyph">::</span><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182861"><span class="hs-identifier hs-type">master</span></a><span>  </span><span class="hs-comment">-- ^ type that specifies which set of translations to use</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-102" name="line-102"></a><span>                  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><a href="../shakespeare-2.0.13/Text.Shakespeare.I18N.html#Lang"><span class="hs-identifier hs-type">Lang</span></a><span class="hs-special">]</span><span>  </span><span class="hs-comment">-- ^ acceptable languages in descending order of preference</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-103" name="line-103"></a><span>                  </span><span class="hs-glyph">-&gt;</span><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182862"><span class="hs-identifier hs-type">message</span></a><span> </span><span class="hs-comment">-- ^ message to translate</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-104" name="line-104"></a><span>                  </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier hs-type">Text</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-105" name="line-105"></a><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-106" name="line-106"></a><span class="hs-keyword">instance</span><span> </span><a href="../shakespeare-2.0.13/Text.Shakespeare.I18N.html#RenderMessage"><span class="hs-identifier hs-type">RenderMessage</span></a><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679183325"><span class="hs-identifier hs-type">master</span></a><span> </span><span class="hs-identifier hs-type">Text</span><span> </span><span class="hs-keyword">where</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-107" name="line-107"></a><span>    </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-8214565720323957744" name="local-8214565720323957744"><a href="../shakespeare-2.0.13/Text.Shakespeare.I18N.html#renderMessage"><span class="hs-identifier">renderMessage</span></a></a><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier hs-var">id</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-108" name="line-108"></a><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-109" name="line-109"></a><span class="hs-comment">-- | an RFC1766 / ISO 639-1 language code (eg, @fr@, @en-GB@, etc).</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-110" name="line-110"></a><span class="hs-keyword">type</span><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#Lang" name="Lang"><a href="../shakespeare-2.0.13/Text.Shakespeare.I18N.html#Lang"><span class="hs-identifier">Lang</span></a></a><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier hs-type">Text</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-111" name="line-111"></a><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-112" name="line-112"></a><span class="hs-comment">-- |generate translations from translation files</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-113" name="line-113"></a><span class="hs-comment">--</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-114" name="line-114"></a><span class="hs-comment">-- This function will:</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-115" name="line-115"></a><span class="hs-comment">--</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-116" name="line-116"></a><span class="hs-comment">--  1. look in the supplied subdirectory for files ending in @.msg@</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-117" name="line-117"></a><span class="hs-comment">--</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-118" name="line-118"></a><span class="hs-comment">--  2. generate a type based on the constructors found</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-119" name="line-119"></a><span class="hs-comment">--</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-120" name="line-120"></a><span class="hs-comment">--  3. create a 'RenderMessage' instance</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-121" name="line-121"></a><span class="hs-comment">--</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-122" name="line-122"></a><span class="hs-identifier">mkMessage</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-identifier hs-type">String</span><span>   </span><span class="hs-comment">-- ^ base name to use for translation type</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-123" name="line-123"></a><span>          </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier hs-type">FilePath</span><span> </span><span class="hs-comment">-- ^ subdirectory which contains the translation files</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-124" name="line-124"></a><span>          </span><span class="hs-glyph">-&gt;</span><span> </span><a href="../shakespeare-2.0.13/Text.Shakespeare.I18N.html#Lang"><span class="hs-identifier hs-type">Lang</span></a><span>     </span><span class="hs-comment">-- ^ default translation language</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-125" name="line-125"></a><span>          </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier hs-type">Q</span><span> </span><span class="hs-special">[</span><span class="hs-identifier hs-type">Dec</span><span class="hs-special">]</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-126" name="line-126"></a><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#mkMessage" name="mkMessage"><a href="../shakespeare-2.0.13/Text.Shakespeare.I18N.html#mkMessage"><span class="hs-identifier">mkMessage</span></a></a><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182864" name="local-6989586621679182864"><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182864"><span class="hs-identifier">dt</span></a></a><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182865" name="local-6989586621679182865"><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182865"><span class="hs-identifier">folder</span></a></a><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182866" name="local-6989586621679182866"><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182866"><span class="hs-identifier">lang</span></a></a><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-127" name="line-127"></a><span>    </span><a href="../shakespeare-2.0.13/Text.Shakespeare.I18N.html#mkMessageCommon"><span class="hs-identifier hs-var">mkMessageCommon</span></a><span> </span><span class="hs-identifier hs-var">True</span><span> </span><span class="hs-string">&quot;Msg&quot;</span><span> </span><span class="hs-string">&quot;Message&quot;</span><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182864"><span class="hs-identifier hs-var">dt</span></a><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182864"><span class="hs-identifier hs-var">dt</span></a><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182865"><span class="hs-identifier hs-var">folder</span></a><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182866"><span class="hs-identifier hs-var">lang</span></a><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-128" name="line-128"></a><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-129" name="line-129"></a><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-130" name="line-130"></a><span class="hs-comment">-- | create 'RenderMessage' instance for an existing data-type</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-131" name="line-131"></a><span class="hs-identifier">mkMessageFor</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-identifier hs-type">String</span><span>     </span><span class="hs-comment">-- ^ master translation data type</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-132" name="line-132"></a><span>             </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier hs-type">String</span><span>     </span><span class="hs-comment">-- ^ existing type to add translations for</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-133" name="line-133"></a><span>             </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier hs-type">FilePath</span><span>   </span><span class="hs-comment">-- ^ path to translation folder</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-134" name="line-134"></a><span>             </span><span class="hs-glyph">-&gt;</span><span> </span><a href="../shakespeare-2.0.13/Text.Shakespeare.I18N.html#Lang"><span class="hs-identifier hs-type">Lang</span></a><span>       </span><span class="hs-comment">-- ^ default language</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-135" name="line-135"></a><span>             </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier hs-type">Q</span><span> </span><span class="hs-special">[</span><span class="hs-identifier hs-type">Dec</span><span class="hs-special">]</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-136" name="line-136"></a><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#mkMessageFor" name="mkMessageFor"><a href="../shakespeare-2.0.13/Text.Shakespeare.I18N.html#mkMessageFor"><span class="hs-identifier">mkMessageFor</span></a></a><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182867" name="local-6989586621679182867"><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182867"><span class="hs-identifier">master</span></a></a><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182868" name="local-6989586621679182868"><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182868"><span class="hs-identifier">dt</span></a></a><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182869" name="local-6989586621679182869"><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182869"><span class="hs-identifier">folder</span></a></a><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182870" name="local-6989586621679182870"><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182870"><span class="hs-identifier">lang</span></a></a><span> </span><span class="hs-glyph">=</span><span> </span><a href="../shakespeare-2.0.13/Text.Shakespeare.I18N.html#mkMessageCommon"><span class="hs-identifier hs-var">mkMessageCommon</span></a><span> </span><span class="hs-identifier hs-var">False</span><span> </span><span class="hs-string">&quot;&quot;</span><span> </span><span class="hs-string">&quot;&quot;</span><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182867"><span class="hs-identifier hs-var">master</span></a><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182868"><span class="hs-identifier hs-var">dt</span></a><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182869"><span class="hs-identifier hs-var">folder</span></a><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182870"><span class="hs-identifier hs-var">lang</span></a><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-137" name="line-137"></a><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-138" name="line-138"></a><span class="hs-comment">-- | create an additional set of translations for a type created by `mkMessage`</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-139" name="line-139"></a><span class="hs-identifier">mkMessageVariant</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-identifier hs-type">String</span><span>     </span><span class="hs-comment">-- ^ master translation data type</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-140" name="line-140"></a><span>                 </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier hs-type">String</span><span>     </span><span class="hs-comment">-- ^ existing type to add translations for</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-141" name="line-141"></a><span>                 </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier hs-type">FilePath</span><span>   </span><span class="hs-comment">-- ^ path to translation folder</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-142" name="line-142"></a><span>                 </span><span class="hs-glyph">-&gt;</span><span> </span><a href="../shakespeare-2.0.13/Text.Shakespeare.I18N.html#Lang"><span class="hs-identifier hs-type">Lang</span></a><span>       </span><span class="hs-comment">-- ^ default language</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-143" name="line-143"></a><span>                 </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier hs-type">Q</span><span> </span><span class="hs-special">[</span><span class="hs-identifier hs-type">Dec</span><span class="hs-special">]</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-144" name="line-144"></a><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#mkMessageVariant" name="mkMessageVariant"><a href="../shakespeare-2.0.13/Text.Shakespeare.I18N.html#mkMessageVariant"><span class="hs-identifier">mkMessageVariant</span></a></a><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182871" name="local-6989586621679182871"><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182871"><span class="hs-identifier">master</span></a></a><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182872" name="local-6989586621679182872"><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182872"><span class="hs-identifier">dt</span></a></a><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182873" name="local-6989586621679182873"><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182873"><span class="hs-identifier">folder</span></a></a><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182874" name="local-6989586621679182874"><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182874"><span class="hs-identifier">lang</span></a></a><span> </span><span class="hs-glyph">=</span><span> </span><a href="../shakespeare-2.0.13/Text.Shakespeare.I18N.html#mkMessageCommon"><span class="hs-identifier hs-var">mkMessageCommon</span></a><span> </span><span class="hs-identifier hs-var">False</span><span> </span><span class="hs-string">&quot;Msg&quot;</span><span> </span><span class="hs-string">&quot;Message&quot;</span><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182871"><span class="hs-identifier hs-var">master</span></a><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182872"><span class="hs-identifier hs-var">dt</span></a><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182873"><span class="hs-identifier hs-var">folder</span></a><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182874"><span class="hs-identifier hs-var">lang</span></a><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-145" name="line-145"></a><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-146" name="line-146"></a><span class="hs-comment">-- |used by 'mkMessage' and 'mkMessageFor' to generate a 'RenderMessage' and possibly a message data type</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-147" name="line-147"></a><span class="hs-identifier">mkMessageCommon</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-identifier hs-type">Bool</span><span>      </span><span class="hs-comment">-- ^ generate a new datatype from the constructors found in the .msg files</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-148" name="line-148"></a><span>                </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier hs-type">String</span><span>    </span><span class="hs-comment">-- ^ string to append to constructor names</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-149" name="line-149"></a><span>                </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier hs-type">String</span><span>    </span><span class="hs-comment">-- ^ string to append to datatype name</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-150" name="line-150"></a><span>                </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier hs-type">String</span><span>    </span><span class="hs-comment">-- ^ base name of master datatype</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-151" name="line-151"></a><span>                </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier hs-type">String</span><span>    </span><span class="hs-comment">-- ^ base name of translation datatype</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-152" name="line-152"></a><span>                </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier hs-type">FilePath</span><span>  </span><span class="hs-comment">-- ^ path to translation folder</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-153" name="line-153"></a><span>                </span><span class="hs-glyph">-&gt;</span><span> </span><a href="../shakespeare-2.0.13/Text.Shakespeare.I18N.html#Lang"><span class="hs-identifier hs-type">Lang</span></a><span>      </span><span class="hs-comment">-- ^ default lang</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-154" name="line-154"></a><span>                </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier hs-type">Q</span><span> </span><span class="hs-special">[</span><span class="hs-identifier hs-type">Dec</span><span class="hs-special">]</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-155" name="line-155"></a><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#mkMessageCommon" name="mkMessageCommon"><a href="../shakespeare-2.0.13/Text.Shakespeare.I18N.html#mkMessageCommon"><span class="hs-identifier">mkMessageCommon</span></a></a><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182875" name="local-6989586621679182875"><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182875"><span class="hs-identifier">genType</span></a></a><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182876" name="local-6989586621679182876"><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182876"><span class="hs-identifier">prefix</span></a></a><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182877" name="local-6989586621679182877"><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182877"><span class="hs-identifier">postfix</span></a></a><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182878" name="local-6989586621679182878"><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182878"><span class="hs-identifier">master</span></a></a><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182879" name="local-6989586621679182879"><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182879"><span class="hs-identifier">dt</span></a></a><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182880" name="local-6989586621679182880"><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182880"><span class="hs-identifier">folder</span></a></a><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182881" name="local-6989586621679182881"><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182881"><span class="hs-identifier">lang</span></a></a><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-156" name="line-156"></a><span>    </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182882" name="local-6989586621679182882"><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182882"><span class="hs-identifier">files</span></a></a><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-identifier hs-var">qRunIO</span><span> </span><span class="hs-operator hs-var">$</span><span> </span><span class="hs-identifier hs-var">getDirectoryContents</span><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182880"><span class="hs-identifier hs-var">folder</span></a><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-157" name="line-157"></a><span>    </span><span class="hs-keyword">let</span><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182883" name="local-6989586621679182883"><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182883"><span class="hs-identifier">files'</span></a></a><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier hs-var">filter</span><span> </span><span class="hs-special">(</span><span class="hs-special">`</span><span class="hs-identifier hs-var">notElem</span><span class="hs-special">`</span><span> </span><span class="hs-special">[</span><span class="hs-string">&quot;.&quot;</span><span class="hs-special">,</span><span> </span><span class="hs-string">&quot;..&quot;</span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182882"><span class="hs-identifier hs-var">files</span></a><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-158" name="line-158"></a><span>    </span><span class="hs-special">(</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182884" name="local-6989586621679182884"><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182884"><span class="hs-identifier">_files'</span></a></a><span class="hs-special">,</span><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182885" name="local-6989586621679182885"><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182885"><span class="hs-identifier">contents</span></a></a><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-identifier hs-var">qRunIO</span><span> </span><span class="hs-operator hs-var">$</span><span> </span><span class="hs-identifier hs-var">fmap</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-var">unzip</span><span> </span><span class="hs-operator hs-var">.</span><span> </span><span class="hs-identifier hs-var">catMaybes</span><span class="hs-special">)</span><span> </span><span class="hs-operator hs-var">$</span><span> </span><span class="hs-identifier hs-var">mapM</span><span> </span><span class="hs-special">(</span><a href="../shakespeare-2.0.13/Text.Shakespeare.I18N.html#loadLang"><span class="hs-identifier hs-var">loadLang</span></a><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182880"><span class="hs-identifier hs-var">folder</span></a><span class="hs-special">)</span><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182883"><span class="hs-identifier hs-var">files'</span></a><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-159" name="line-159"></a><span class="hs-cpp">#ifdef GHC_7_4</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-160" name="line-160"></a><span>    </span><span class="hs-identifier hs-var">mapM_</span><span> </span><span class="hs-identifier hs-var">qAddDependentFile</span><span> </span><span class="hs-operator hs-var">$</span><span> </span><span class="hs-identifier hs-var">concat</span><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182884"><span class="hs-identifier hs-var">_files'</span></a><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-161" name="line-161"></a><span class="hs-cpp">#endif</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-162" name="line-162"></a><span>    </span><span class="hs-keyword">let</span><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182886" name="local-6989586621679182886"><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182886"><span class="hs-identifier">contents'</span></a></a><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier hs-var">Map</span><span class="hs-operator hs-var">.</span><span class="hs-identifier hs-var">toList</span><span> </span><span class="hs-operator hs-var">$</span><span> </span><span class="hs-identifier hs-var">Map</span><span class="hs-operator hs-var">.</span><span class="hs-identifier hs-var">fromListWith</span><span> </span><span class="hs-special">(</span><span class="hs-operator hs-var">++</span><span class="hs-special">)</span><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182885"><span class="hs-identifier hs-var">contents</span></a><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-163" name="line-163"></a><span>    </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182888" name="local-6989586621679182888"><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182888"><span class="hs-identifier">sdef</span></a></a><span> </span><span class="hs-glyph">&lt;-</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-164" name="line-164"></a><span>        </span><span class="hs-keyword">case</span><span> </span><span class="hs-identifier hs-var">lookup</span><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182881"><span class="hs-identifier hs-var">lang</span></a><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182886"><span class="hs-identifier hs-var">contents'</span></a><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-165" name="line-165"></a><span>            </span><span class="hs-identifier hs-var">Nothing</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier hs-var">error</span><span> </span><span class="hs-operator hs-var">$</span><span> </span><span class="hs-string">&quot;Did not find main language file: &quot;</span><span> </span><span class="hs-operator hs-var">++</span><span> </span><span class="hs-identifier hs-var">unpack</span><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182881"><span class="hs-identifier hs-var">lang</span></a><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-166" name="line-166"></a><span>            </span><span class="hs-identifier hs-var">Just</span><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182887" name="local-6989586621679182887"><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182887"><span class="hs-identifier">def</span></a></a><span> </span><span class="hs-glyph">-&gt;</span><span> </span><a href="../shakespeare-2.0.13/Text.Shakespeare.I18N.html#toSDefs"><span class="hs-identifier hs-var">toSDefs</span></a><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182887"><span class="hs-identifier hs-var">def</span></a><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-167" name="line-167"></a><span>    </span><span class="hs-identifier hs-var">mapM_</span><span> </span><span class="hs-special">(</span><a href="../shakespeare-2.0.13/Text.Shakespeare.I18N.html#checkDef"><span class="hs-identifier hs-var">checkDef</span></a><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182888"><span class="hs-identifier hs-var">sdef</span></a><span class="hs-special">)</span><span> </span><span class="hs-operator hs-var">$</span><span> </span><span class="hs-identifier hs-var">map</span><span> </span><span class="hs-identifier hs-var">snd</span><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182886"><span class="hs-identifier hs-var">contents'</span></a><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-168" name="line-168"></a><span>    </span><span class="hs-keyword">let</span><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182900" name="local-6989586621679182900"><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182900"><span class="hs-identifier">mname</span></a></a><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier hs-var">mkName</span><span> </span><span class="hs-operator hs-var">$</span><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182879"><span class="hs-identifier hs-var">dt</span></a><span> </span><span class="hs-operator hs-var">++</span><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182877"><span class="hs-identifier hs-var">postfix</span></a><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-169" name="line-169"></a><span>    </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182901" name="local-6989586621679182901"><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182901"><span class="hs-identifier">c1</span></a></a><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-identifier hs-var">fmap</span><span> </span><span class="hs-identifier hs-var">concat</span><span> </span><span class="hs-operator hs-var">$</span><span> </span><span class="hs-identifier hs-var">mapM</span><span> </span><span class="hs-special">(</span><a href="../shakespeare-2.0.13/Text.Shakespeare.I18N.html#toClauses"><span class="hs-identifier hs-var">toClauses</span></a><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182876"><span class="hs-identifier hs-var">prefix</span></a><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182879"><span class="hs-identifier hs-var">dt</span></a><span class="hs-special">)</span><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182886"><span class="hs-identifier hs-var">contents'</span></a><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-170" name="line-170"></a><span>    </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182902" name="local-6989586621679182902"><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182902"><span class="hs-identifier">c2</span></a></a><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-identifier hs-var">mapM</span><span> </span><span class="hs-special">(</span><a href="../shakespeare-2.0.13/Text.Shakespeare.I18N.html#sToClause"><span class="hs-identifier hs-var">sToClause</span></a><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182876"><span class="hs-identifier hs-var">prefix</span></a><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182879"><span class="hs-identifier hs-var">dt</span></a><span class="hs-special">)</span><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182888"><span class="hs-identifier hs-var">sdef</span></a><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-171" name="line-171"></a><span>    </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182903" name="local-6989586621679182903"><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182903"><span class="hs-identifier">c3</span></a></a><span> </span><span class="hs-glyph">&lt;-</span><span> </span><a href="../shakespeare-2.0.13/Text.Shakespeare.I18N.html#defClause"><span class="hs-identifier hs-var">defClause</span></a><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-172" name="line-172"></a><span>    </span><span class="hs-identifier hs-var">return</span><span> </span><span class="hs-operator hs-var">$</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-173" name="line-173"></a><span>     </span><span class="hs-special">(</span><span> </span><span class="hs-keyword">if</span><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182875"><span class="hs-identifier hs-var">genType</span></a><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-174" name="line-174"></a><span>       </span><span class="hs-keyword">then</span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="hs-identifier hs-var">DataD</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182900"><span class="hs-identifier hs-var">mname</span></a><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-175" name="line-175"></a><span class="hs-cpp">#if MIN_VERSION_template_haskell(2,11,0)</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-176" name="line-176"></a><span>                    </span><span class="hs-identifier hs-var">Nothing</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-177" name="line-177"></a><span class="hs-cpp">#endif</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-178" name="line-178"></a><span>                    </span><span class="hs-special">(</span><span class="hs-identifier hs-var">map</span><span> </span><span class="hs-special">(</span><a href="../shakespeare-2.0.13/Text.Shakespeare.I18N.html#toCon"><span class="hs-identifier hs-var">toCon</span></a><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182879"><span class="hs-identifier hs-var">dt</span></a><span class="hs-special">)</span><span> </span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#local-6989586621679182888"><span class="hs-identifier hs-var">sdef</span></a><span class="hs-special">)</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">)</span><span> </span><span class="hs-glyph">:</span><span class="hs-special">)</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-179" name="line-179"></a><span>       </span><span class="hs-keyword">else</span><span> </span><span class="hs-identifier hs-var">id</span><span class="hs-special">)</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-180" name="line-180"></a><span>        </span><span class="hs-special">[</span><span> </span><a href="../shakespeare-2.0.13/Text.Shakespeare.I18N.html#instanceD"><span class="hs-identifier hs-var">instanceD</span></a><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-181" name="line-181"></a><span>            </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><a href="../shakespeare-2.0.13/src/Text.Shakespeare.I18N.html#line-182" name="line-182"></a><span>            </span><span class="hs-special">(</span><span class="hs-identifier hs-var">ConT</span><span> </span><span class="hs-char">''RenderMessage `AppT` (ConT $ mkName master) `AppT` ConT mname)
+            [ FunD (mkName &quot;renderMessage&quot;) $ c1 ++ c2 ++ [c3]
+            ]
+        ]
+
+toClauses :: String -&gt; String -&gt; (Lang, [Def]) -&gt; Q [Clause]
+toClauses prefix dt (lang, defs) =
+    mapM go defs
+  where
+    go def = do
+        a &lt;- newName &quot;lang&quot;
+        (pat, bod) &lt;- mkBody dt (prefix ++ constr def) (map fst $ vars def) (content def)
+        guard &lt;- fmap NormalG [|$(return $ VarE a) == pack $(lift $ unpack lang)|]
+        return $ Clause
+            [WildP, ConP (mkName &quot;:&quot;) [VarP a, WildP], pat]
+            (GuardedB [(guard, bod)])
+            []
+
+mkBody :: String -- ^ datatype
+       -&gt; String -- ^ constructor
+       -&gt; [String] -- ^ variable names
+       -&gt; [Content]
+       -&gt; Q (Pat, Exp)
+mkBody dt cs vs ct = do
+    vp &lt;- mapM go vs
+    let pat = RecP (mkName cs) (map (varName dt *** VarP) vp)
+    let ct' = map (fixVars vp) ct
+    pack' &lt;- [|Data.Text.pack|]
+    tomsg &lt;- [|toMessage|]
+    let ct'' = map (toH pack' tomsg) ct'
+    mapp &lt;- [|mappend|]
+    let app a b = InfixE (Just a) mapp (Just b)
+    e &lt;-
+        case ct'' of
+            [] -&gt; [|mempty|]
+            [x] -&gt; return x
+            (x:xs) -&gt; return $ foldl' app x xs
+    return (pat, e)
+  where
+    toH pack' _ (Raw s) = pack' `AppE` SigE (LitE (StringL s)) (ConT ''String)
+    toH _ tomsg (Var d) = tomsg `AppE` derefToExp [] d
+    go x = do
+        let y = mkName $ '_' : x
+        return (x, y)
+    fixVars vp (Var d) = Var $ fixDeref vp d
+    fixVars _ (Raw s) = Raw s
+    fixDeref vp (DerefIdent (Ident i)) = DerefIdent $ Ident $ fixIdent vp i
+    fixDeref vp (DerefBranch a b) = DerefBranch (fixDeref vp a) (fixDeref vp b)
+    fixDeref _ d = d
+    fixIdent vp i =
+        case lookup i vp of
+            Nothing -&gt; i
+            Just y -&gt; nameBase y
+
+sToClause :: String -&gt; String -&gt; SDef -&gt; Q Clause
+sToClause prefix dt sdef = do
+    (pat, bod) &lt;- mkBody dt (prefix ++ sconstr sdef) (map fst $ svars sdef) (scontent sdef)
+    return $ Clause
+        [WildP, ConP (mkName &quot;[]&quot;) [], pat]
+        (NormalB bod)
+        []
+
+defClause :: Q Clause
+defClause = do
+    a &lt;- newName &quot;sub&quot;
+    c &lt;- newName &quot;langs&quot;
+    d &lt;- newName &quot;msg&quot;
+    rm &lt;- [|renderMessage|]
+    return $ Clause
+        [VarP a, ConP (mkName &quot;:&quot;) [WildP, VarP c], VarP d]
+        (NormalB $ rm `AppE` VarE a `AppE` VarE c `AppE` VarE d)
+        []
+
+toCon :: String -&gt; SDef -&gt; Con
+toCon dt (SDef c vs _) =
+    RecC (mkName $ &quot;Msg&quot; ++ c) $ map go vs
+  where
+    go (n, t) = (varName dt n, notStrict, ConT $ mkName t)
+
+varName :: String -&gt; String -&gt; Name
+varName a y =
+    mkName $ concat [lower a, &quot;Message&quot;, upper y]
+  where
+    lower (x:xs) = toLower x : xs
+    lower [] = []
+    upper (x:xs) = toUpper x : xs
+    upper [] = []
+
+checkDef :: [SDef] -&gt; [Def] -&gt; Q ()
+checkDef x y =
+    go (sortBy (comparing sconstr) x) (sortBy (comparing constr) y)
+  where
+    go _ [] = return ()
+    go [] (b:_) = error $ &quot;Extra message constructor: &quot; ++ constr b
+    go (a:as) (b:bs)
+        | sconstr a &lt; constr b = go as (b:bs)
+        | sconstr a &gt; constr b = error $ &quot;Extra message constructor: &quot; ++ constr b
+        | otherwise = do
+            go' (svars a) (vars b)
+            go as bs
+    go' ((an, at):as) ((bn, mbt):bs)
+        | an /= bn = error &quot;Mismatched variable names&quot;
+        | otherwise =
+            case mbt of
+                Nothing -&gt; go' as bs
+                Just bt
+                    | at == bt -&gt; go' as bs
+                    | otherwise -&gt; error &quot;Mismatched variable types&quot;
+    go' [] [] = return ()
+    go' _ _ = error &quot;Mistmached variable count&quot;
+
+toSDefs :: [Def] -&gt; Q [SDef]
+toSDefs = mapM toSDef
+
+toSDef :: Def -&gt; Q SDef
+toSDef d = do
+    vars' &lt;- mapM go $ vars d
+    return $ SDef (constr d) vars' (content d)
+  where
+    go (a, Just b) = return (a, b)
+    go (a, Nothing) = error $ &quot;Main language missing type for &quot; ++ show (constr d, a)
+
+data SDef = SDef
+    { sconstr :: String
+    , svars :: [(String, String)]
+    , scontent :: [Content]
+    }
+
+data Def = Def
+    { constr :: String
+    , vars :: [(String, Maybe String)]
+    , content :: [Content]
+    }
+
+(&lt;/&gt;) :: FilePath -&gt; FilePath -&gt; FilePath
+path &lt;/&gt; file = path ++ '/' : file
+
+loadLang :: FilePath -&gt; FilePath -&gt; IO (Maybe ([FilePath], (Lang, [Def])))
+loadLang folder file = do
+    let file' = folder &lt;/&gt; file
+    isFile &lt;- doesFileExist file'
+    if isFile &amp;&amp; &quot;.msg&quot; `isSuffixOf` file
+        then do
+            let lang = pack $ reverse $ drop 4 $ reverse file
+            defs &lt;- loadLangFile file'
+            return $ Just ([file'], (lang, defs))
+        else do
+            isDir &lt;- doesDirectoryExist file'
+            if isDir
+                then do
+                    let lang = pack file
+                    (files, defs) &lt;- unzip &lt;$&gt; loadLangDir file'
+                    return $ Just (files, (lang, concat defs))
+                else
+                    return Nothing
+
+loadLangDir :: FilePath -&gt; IO [(FilePath, [Def])]
+loadLangDir folder = do
+    paths &lt;- map (folder &lt;/&gt;) . filter (`notElem` [&quot;.&quot;, &quot;..&quot;]) &lt;$&gt; getDirectoryContents folder
+    files &lt;- filterM doesFileExist paths
+    dirs  &lt;- filterM doesDirectoryExist paths
+    langFiles &lt;-
+        forM files $ \file -&gt; do
+            if &quot;.msg&quot; `isSuffixOf` file
+                then do
+                  defs &lt;- loadLangFile file
+                  return $ Just (file, defs)
+                else do
+                  return Nothing
+    langDirs &lt;- mapM loadLangDir dirs
+    return $ catMaybes langFiles ++ concat langDirs
+
+loadLangFile :: FilePath -&gt; IO [Def]
+loadLangFile file = do
+    bs &lt;- S.readFile file
+    let s = unpack $ decodeUtf8 bs
+    defs &lt;- fmap catMaybes $ mapM (parseDef . T.unpack . T.strip . T.pack) $ lines s
+    return defs
+
+parseDef :: String -&gt; IO (Maybe Def)
+parseDef &quot;&quot; = return Nothing
+parseDef ('#':_) = return Nothing
+parseDef s =
+    case end of
+        ':':end' -&gt; do
+            content' &lt;- fmap compress $ parseContent $ dropWhile isSpace end'
+            case words begin of
+                [] -&gt; error $ &quot;Missing constructor: &quot; ++ s
+                (w:ws) -&gt; return $ Just Def
+                            { constr = w
+                            , vars = map parseVar ws
+                            , content = content'
+                            }
+        _ -&gt; error $ &quot;Missing colon: &quot; ++ s
+  where
+    (begin, end) = break (== ':') s
+
+data Content = Var Deref | Raw String
+
+compress :: [Content] -&gt; [Content]
+compress [] = []
+compress (Raw a:Raw b:rest) = compress $ Raw (a ++ b) : rest
+compress (x:y) = x : compress y
+
+parseContent :: String -&gt; IO [Content]
+parseContent s =
+    either (error . show) return $ parse go s s
+  where
+    go = do
+        x &lt;- many go'
+        eof
+        return x
+    go' = (Raw `fmap` many1 (noneOf &quot;#&quot;)) &lt;|&gt; (fmap (either Raw Var) parseHash)
+
+parseVar :: String -&gt; (String, Maybe String)
+parseVar s =
+    case break (== '@') s of
+        (x, '@':y) -&gt; (x, Just y)
+        _ -&gt; (s, Nothing)
+
+data SomeMessage master = forall msg. RenderMessage master msg =&gt; SomeMessage msg
+
+instance IsString (SomeMessage master) where
+    fromString = SomeMessage . T.pack
+
+instance master ~ master' =&gt; RenderMessage master (SomeMessage master') where
+    renderMessage a b (SomeMessage msg) = renderMessage a b msg
+
+#if MIN_VERSION_template_haskell(2,11,0)
+notStrict :: Bang
+notStrict = Bang NoSourceUnpackedness NoSourceStrictness
+#else
+notStrict :: Strict
+notStrict = NotStrict
+#endif
+
+instanceD :: Cxt -&gt; Type -&gt; [Dec] -&gt; Dec
+#if MIN_VERSION_template_haskell(2,11,0)
+instanceD = InstanceD Nothing
+#else
+instanceD = InstanceD
+#endif
+</span></pre></body></html>

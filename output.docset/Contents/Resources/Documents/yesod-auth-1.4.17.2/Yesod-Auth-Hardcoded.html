@@ -1,0 +1,60 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></meta><title>Yesod.Auth.Hardcoded</title><link href="ocean.css" rel="stylesheet" type="text/css" title="Ocean"></link><script src="haddock-util.js" type="text/javascript"></script><script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script><script type="text/javascript">//<![CDATA[
+window.onload = function () {pageLoad();setSynopsis("mini_Yesod-Auth-Hardcoded.html");};
+//]]>
+</script></head><body><div id="package-header"><ul class="links" id="page-menu"><li><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html">Source</a></li><li><a href="../yesod-auth-1.4.17.2/index.html">Contents</a></li><li><a href="../yesod-auth-1.4.17.2/doc-index.html">Index</a></li></ul><p class="caption">yesod-auth-1.4.17.2: Authentication for Yesod.</p></div><div id="content"><div id="module-header"><table class="info"><tr><th valign="top">Copyright</th><td>(c) Arthur Fayzrakhmanov 2015</td></tr><tr><th>License</th><td>MIT</td></tr><tr><th>Maintainer</th><td>heraldhoi@gmail.com</td></tr><tr><th>Stability</th><td>experimental</td></tr><tr><th>Safe Haskell</th><td>None</td></tr><tr><th>Language</th><td>Haskell98</td></tr></table><p class="caption">Yesod.Auth.Hardcoded</p></div><div id="description"><p class="caption">Description</p><div class="doc"><p>Sometimes you may want to have some hardcoded set of users (e.g. site managers)
+that allowed to log in and visit some specific sections of your website without
+ability to register new managers.  This simple plugin is designed exactly for
+this purpose.</p><p>Here is a quick usage example.</p><h2>Define hardcoded users representation</h2><p>Let's assume, that we want to have some hardcoded managers with normal site
+users.  Let's define hardcoded user representation:</p><pre>data SiteManager = SiteManager
+  { manUserName :: Text
+  , manPassWord :: Text }
+  deriving Show
+
+siteManagers :: [SiteManager]
+siteManagers = [SiteManager &quot;content editor&quot; &quot;top secret&quot;]
+</pre><h2>Describe <code><a href="../yesod-auth-1.4.17.2/Yesod-Auth.html#t:YesodAuth">YesodAuth</a></code> instance</h2><p>Now we need to have some convenient <code>AuthId</code> type representing both
+cases:</p><pre>instance YesodAuth App where
+  type AuthId App = Either UserId Text
+</pre><p>Here, right <code>Text</code> value will present hardcoded user name (which obviously must
+be unique).</p><p><code>AuthId</code> must have an instance of <code><a href="../path-pieces-0.2.1/Web-PathPieces.html#t:PathPiece">PathPiece</a></code> class, this is needed to store
+user identifier in session (this happens in <code>setCreds</code> and <code><a href="../yesod-auth-1.4.17.2/Yesod-Auth.html#v:setCredsRedirect">setCredsRedirect</a></code>
+actions) and to read that identifier from session (this happens in
+<code>dafaultMaybeAuthId</code> action).  So we have to define it:</p><pre>import Text.Read (readMaybe)
+
+instance PathPiece (Either UserId Text) where
+  fromPathPiece = readMaybe . unpack
+  toPathPiece = pack . show
+</pre><p>Quiet simple so far.  Now let's add plugin to <code>authPlugins</code> list, and define
+<code>authenticate</code> method, it should return user identifier for given credentials,
+for normal users it is usually persistent key, for hardcoded users we will
+return user name again.</p><pre>instance YesodAuth App where
+  -- ..
+  authPlugins _ = [authHardcoded]
+
+  authenticate Creds{..} =
+    return
+      (case credsPlugin of
+         &quot;hardcoded&quot; -&gt;
+           case lookupUser credsIdent of
+             Nothing -&gt; UserError InvalidLogin
+             Just m  -&gt; Authenticated (Right (manUserName m)))
+</pre><p>Here <code>lookupUser</code> is just a helper function to lookup hardcoded users by name:</p><pre>lookupUser :: Text -&gt; Maybe SiteManager
+lookupUser username = find (m -&gt; manUserName m == username) siteManagers
+</pre><h2>Describe an <code>YesodAuthPersist</code> instance</h2><p>Now we need to manually define <code>YesodAuthPersist</code> instance.</p><pre>instance YesodAuthPersist App where
+  type AuthEntity App = Either User SiteManager
+
+  getAuthEntity (Left uid) =
+    do x &lt;- runDB (get uid)
+       return (Left &lt;$&gt; x)
+  getAuthEntity (Right username) = return (Right &lt;$&gt; lookupUser username)</pre><h2>Define <code><a href="../yesod-auth-1.4.17.2/Yesod-Auth-Hardcoded.html#t:YesodAuthHardcoded">YesodAuthHardcoded</a></code> instance</h2><p>Finally, let's define an plugin instance</p><pre>instance YesodAuthHardcoded App where
+  validatePassword u = return . validPassword u
+  doesUserNameExist  = return . isJust . lookupUser
+
+validPassword :: Text -&gt; Text -&gt; Bool
+validPassword u p =
+  case find (m -&gt; manUserName m == u &amp;&amp; manPassWord m == p) siteManagers of
+    Just _ -&gt; True
+    _      -&gt; False
+</pre><h2>Conclusion</h2><p>Now we can use <code>maybeAuthId</code>, <code>maybeAuthPair</code>, <code>requireAuthId</code>, and
+<code>requireAuthPair</code>, moreover, the returned value makes possible to distinguish
+normal users and site managers.</p></div></div><div id="interface"><h1>Documentation</h1><div class="top"><p class="src"><span class="keyword">class</span> <a href="../yesod-auth-1.4.17.2/Yesod-Auth.html#t:YesodAuth">YesodAuth</a> site =&gt; <a id="t:YesodAuthHardcoded" class="def">YesodAuthHardcoded</a> site <span class="keyword">where</span> <a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#YesodAuthHardcoded" class="link">Source</a> <a href="../yesod-auth-1.4.17.2/Yesod-Auth-Hardcoded.html#t:YesodAuthHardcoded" class="selflink">#</a></p><div class="subs minimal"><p class="caption">Minimal complete definition</p><p class="src"><a href="../yesod-auth-1.4.17.2/Yesod-Auth-Hardcoded.html#v:doesUserNameExist">doesUserNameExist</a>, <a href="../yesod-auth-1.4.17.2/Yesod-Auth-Hardcoded.html#v:validatePassword">validatePassword</a></p></div><div class="subs methods"><p class="caption">Methods</p><p class="src"><a id="v:doesUserNameExist" class="def">doesUserNameExist</a> :: <a href="../text-1.2.2.1/Data-Text.html#t:Text">Text</a> -&gt; <a href="../yesod-core-1.4.35/Yesod-Core-Types.html#t:HandlerT">HandlerT</a> site <a href="../base-4.9.1.0/System-IO.html#t:IO">IO</a> <a href="../base-4.9.1.0/Data-Bool.html#t:Bool">Bool</a> <a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#doesUserNameExist" class="link">Source</a> <a href="../yesod-auth-1.4.17.2/Yesod-Auth-Hardcoded.html#v:doesUserNameExist" class="selflink">#</a></p><div class="doc"><p>Check whether given user name exists among hardcoded names.</p></div><p class="src"><a id="v:validatePassword" class="def">validatePassword</a> :: <a href="../text-1.2.2.1/Data-Text.html#t:Text">Text</a> -&gt; <a href="../text-1.2.2.1/Data-Text.html#t:Text">Text</a> -&gt; <a href="../yesod-core-1.4.35/Yesod-Core-Types.html#t:HandlerT">HandlerT</a> site <a href="../base-4.9.1.0/System-IO.html#t:IO">IO</a> <a href="../base-4.9.1.0/Data-Bool.html#t:Bool">Bool</a> <a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#validatePassword" class="link">Source</a> <a href="../yesod-auth-1.4.17.2/Yesod-Auth-Hardcoded.html#v:validatePassword" class="selflink">#</a></p><div class="doc"><p>Validate given user name with given password.</p></div></div></div><div class="top"><p class="src"><a id="v:authHardcoded" class="def">authHardcoded</a> :: <a href="../yesod-auth-1.4.17.2/Yesod-Auth-Hardcoded.html#t:YesodAuthHardcoded">YesodAuthHardcoded</a> m =&gt; <a href="../yesod-auth-1.4.17.2/Yesod-Auth.html#t:AuthPlugin">AuthPlugin</a> m <a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#authHardcoded" class="link">Source</a> <a href="../yesod-auth-1.4.17.2/Yesod-Auth-Hardcoded.html#v:authHardcoded" class="selflink">#</a></p></div><div class="top"><p class="src"><a id="v:loginR" class="def">loginR</a> :: <a href="../yesod-auth-1.4.17.2/Yesod-Auth.html#t:AuthRoute">AuthRoute</a> <a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#loginR" class="link">Source</a> <a href="../yesod-auth-1.4.17.2/Yesod-Auth-Hardcoded.html#v:loginR" class="selflink">#</a></p></div></div></div><div id="footer"><p>Produced by <a href="http://www.haskell.org/haddock/">Haddock</a> version 2.17.3</p></div></body></html>

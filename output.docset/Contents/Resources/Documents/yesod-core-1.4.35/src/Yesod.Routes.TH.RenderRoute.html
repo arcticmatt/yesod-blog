@@ -1,0 +1,199 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css"></link><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE TemplateHaskell, CPP #-}</span><span>
+</span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#line-2" name="line-2"></a><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Yesod</span><span class="hs-operator">.</span><span class="hs-identifier">Routes</span><span class="hs-operator">.</span><span class="hs-identifier">TH</span><span class="hs-operator">.</span><span class="hs-identifier">RenderRoute</span><span>
+</span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#line-3" name="line-3"></a><span>    </span><span class="hs-special">(</span><span> </span><span class="hs-comment">-- ** RenderRoute</span><span>
+</span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#line-4" name="line-4"></a><span>      </span><a href="../yesod-core-1.4.35/Yesod.Routes.TH.RenderRoute.html#mkRenderRouteInstance"><span class="hs-identifier hs-var">mkRenderRouteInstance</span></a><span>
+</span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#line-5" name="line-5"></a><span>    </span><span class="hs-special">,</span><span> </span><a href="../yesod-core-1.4.35/Yesod.Routes.TH.RenderRoute.html#mkRenderRouteInstance%27"><span class="hs-identifier hs-var">mkRenderRouteInstance'</span></a><span>
+</span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#line-6" name="line-6"></a><span>    </span><span class="hs-special">,</span><span> </span><a href="../yesod-core-1.4.35/Yesod.Routes.TH.RenderRoute.html#mkRouteCons"><span class="hs-identifier hs-var">mkRouteCons</span></a><span>
+</span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#line-7" name="line-7"></a><span>    </span><span class="hs-special">,</span><span> </span><a href="../yesod-core-1.4.35/Yesod.Routes.TH.RenderRoute.html#mkRenderRouteClauses"><span class="hs-identifier hs-var">mkRenderRouteClauses</span></a><span>
+</span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#line-8" name="line-8"></a><span>    </span><span class="hs-special">)</span><span> </span><span class="hs-keyword">where</span><span>
+</span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#line-9" name="line-9"></a><span>
+</span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#line-10" name="line-10"></a><span class="hs-keyword">import</span><span> </span><a href="../yesod-core-1.4.35/Yesod.Routes.TH.Types.html"><span class="hs-identifier">Yesod</span><span class="hs-operator">.</span><span class="hs-identifier">Routes</span><span class="hs-operator">.</span><span class="hs-identifier">TH</span><span class="hs-operator">.</span><span class="hs-identifier">Types</span></a><span>
+</span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#line-11" name="line-11"></a><span class="hs-cpp">#if MIN_VERSION_template_haskell(2,11,0)</span><span>
+</span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#line-12" name="line-12"></a><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Language</span><span class="hs-operator">.</span><span class="hs-identifier">Haskell</span><span class="hs-operator">.</span><span class="hs-identifier">TH</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-var">conT</span><span class="hs-special">)</span><span>
+</span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#line-13" name="line-13"></a><span class="hs-cpp">#endif</span><span>
+</span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#line-14" name="line-14"></a><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Language</span><span class="hs-operator">.</span><span class="hs-identifier">Haskell</span><span class="hs-operator">.</span><span class="hs-identifier">TH</span><span class="hs-operator">.</span><span class="hs-identifier">Syntax</span><span>
+</span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#line-15" name="line-15"></a><span class="hs-cpp">#if MIN_VERSION_template_haskell(2,11,0)</span><span>
+</span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#line-16" name="line-16"></a><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Data</span><span class="hs-operator">.</span><span class="hs-identifier">Bits</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-var">xor</span><span class="hs-special">)</span><span>
+</span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#line-17" name="line-17"></a><span class="hs-cpp">#endif</span><span>
+</span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#line-18" name="line-18"></a><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Data</span><span class="hs-operator">.</span><span class="hs-identifier">Maybe</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-var">maybeToList</span><span class="hs-special">)</span><span>
+</span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#line-19" name="line-19"></a><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Control</span><span class="hs-operator">.</span><span class="hs-identifier">Monad</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-var">replicateM</span><span class="hs-special">)</span><span>
+</span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#line-20" name="line-20"></a><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Data</span><span class="hs-operator">.</span><span class="hs-identifier">Text</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-var">pack</span><span class="hs-special">)</span><span>
+</span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#line-21" name="line-21"></a><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Web</span><span class="hs-operator">.</span><span class="hs-identifier">PathPieces</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">PathPiece</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-type">PathMultiPiece</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#line-22" name="line-22"></a><span class="hs-keyword">import</span><span> </span><a href="../yesod-core-1.4.35/Yesod.Routes.Class.html"><span class="hs-identifier">Yesod</span><span class="hs-operator">.</span><span class="hs-identifier">Routes</span><span class="hs-operator">.</span><span class="hs-identifier">Class</span></a><span>
+</span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#line-23" name="line-23"></a><span class="hs-cpp">#if __GLASGOW_HASKELL__ &lt; 710</span><span>
+</span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#line-24" name="line-24"></a><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Control</span><span class="hs-operator">.</span><span class="hs-identifier">Applicative</span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="hs-operator">&lt;$&gt;</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#line-25" name="line-25"></a><span class="hs-keyword">import</span><span> </span><span class="hs-identifier">Data</span><span class="hs-operator">.</span><span class="hs-identifier">Monoid</span><span> </span><span class="hs-special">(</span><span class="hs-identifier">mconcat</span><span class="hs-special">)</span><span>
+</span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#line-26" name="line-26"></a><span class="hs-cpp">#endif</span><span>
+</span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#line-27" name="line-27"></a><span>
+</span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#line-28" name="line-28"></a><span class="hs-comment">-- | Generate the constructors of a route data type.</span><span>
+</span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#line-29" name="line-29"></a><span class="hs-identifier">mkRouteCons</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">[</span><a href="../yesod-core-1.4.35/Yesod.Routes.TH.Types.html#ResourceTree"><span class="hs-identifier hs-type">ResourceTree</span></a><span> </span><span class="hs-identifier hs-type">Type</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier hs-type">Q</span><span> </span><span class="hs-special">(</span><span class="hs-special">[</span><span class="hs-identifier hs-type">Con</span><span class="hs-special">]</span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="hs-identifier hs-type">Dec</span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#line-30" name="line-30"></a><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#mkRouteCons" name="mkRouteCons"><a href="../yesod-core-1.4.35/Yesod.Routes.TH.RenderRoute.html#mkRouteCons"><span class="hs-identifier">mkRouteCons</span></a></a><span> </span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#local-6989586621679130248" name="local-6989586621679130248"><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#local-6989586621679130248"><span class="hs-identifier">rttypes</span></a></a><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#line-31" name="line-31"></a><span>    </span><span class="hs-identifier hs-var">mconcat</span><span> </span><span class="hs-operator hs-var">&lt;$&gt;</span><span> </span><span class="hs-identifier hs-var">mapM</span><span> </span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#local-6989586621679130249"><span class="hs-identifier hs-var">mkRouteCon</span></a><span> </span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#local-6989586621679130248"><span class="hs-identifier hs-var">rttypes</span></a><span>
+</span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#line-32" name="line-32"></a><span>  </span><span class="hs-keyword">where</span><span>
+</span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#line-33" name="line-33"></a><span>    </span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#local-6989586621679130249" name="local-6989586621679130249"><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#local-6989586621679130249"><span class="hs-identifier">mkRouteCon</span></a></a><span> </span><span class="hs-special">(</span><a href="../yesod-core-1.4.35/Yesod.Routes.TH.Types.html#ResourceLeaf"><span class="hs-identifier hs-var">ResourceLeaf</span></a><span> </span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#local-6989586621679130250" name="local-6989586621679130250"><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#local-6989586621679130250"><span class="hs-identifier">res</span></a></a><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#line-34" name="line-34"></a><span>        </span><span class="hs-identifier hs-var">return</span><span> </span><span class="hs-special">(</span><span class="hs-special">[</span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#local-6989586621679130251"><span class="hs-identifier hs-var">con</span></a><span class="hs-special">]</span><span class="hs-special">,</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">)</span><span>
+</span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#line-35" name="line-35"></a><span>      </span><span class="hs-keyword">where</span><span>
+</span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#line-36" name="line-36"></a><span>        </span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#local-6989586621679130251" name="local-6989586621679130251"><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#local-6989586621679130251"><span class="hs-identifier">con</span></a></a><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier hs-var">NormalC</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-var">mkName</span><span> </span><span class="hs-operator hs-var">$</span><span> </span><span class="hs-identifier">resourceName</span><span> </span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#local-6989586621679130250"><span class="hs-identifier hs-var">res</span></a><span class="hs-special">)</span><span>
+</span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#line-37" name="line-37"></a><span>            </span><span class="hs-operator hs-var">$</span><span> </span><span class="hs-identifier hs-var">map</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">\</span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#local-6989586621679130256" name="local-6989586621679130256"><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#local-6989586621679130256"><span class="hs-identifier">x</span></a></a><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">(</span><a href="../yesod-core-1.4.35/Yesod.Routes.TH.RenderRoute.html#notStrict"><span class="hs-identifier hs-var">notStrict</span></a><span class="hs-special">,</span><span> </span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#local-6989586621679130256"><span class="hs-identifier hs-var">x</span></a><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#line-38" name="line-38"></a><span>            </span><span class="hs-operator hs-var">$</span><span> </span><span class="hs-identifier hs-var">concat</span><span> </span><span class="hs-special">[</span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#local-6989586621679130252"><span class="hs-identifier hs-var">singles</span></a><span class="hs-special">,</span><span> </span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#local-6989586621679130254"><span class="hs-identifier hs-var">multi</span></a><span class="hs-special">,</span><span> </span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#local-6989586621679130255"><span class="hs-identifier hs-var">sub</span></a><span class="hs-special">]</span><span>
+</span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#line-39" name="line-39"></a><span>        </span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#local-6989586621679130252" name="local-6989586621679130252"><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#local-6989586621679130252"><span class="hs-identifier">singles</span></a></a><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier hs-var">concatMap</span><span> </span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#local-6989586621679130253"><span class="hs-identifier hs-var">toSingle</span></a><span> </span><span class="hs-operator hs-var">$</span><span> </span><span class="hs-identifier">resourcePieces</span><span> </span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#local-6989586621679130250"><span class="hs-identifier hs-var">res</span></a><span>
+</span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#line-40" name="line-40"></a><span>        </span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#local-6989586621679130253" name="local-6989586621679130253"><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#local-6989586621679130253"><span class="hs-identifier">toSingle</span></a></a><span> </span><a href="../yesod-core-1.4.35/Yesod.Routes.TH.Types.html#Static"><span class="hs-identifier hs-var">Static</span></a><span class="hs-special">{</span><span class="hs-special">}</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span>
+</span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#line-41" name="line-41"></a><span>        </span><span class="hs-identifier">toSingle</span><span> </span><span class="hs-special">(</span><a href="../yesod-core-1.4.35/Yesod.Routes.TH.Types.html#Dynamic"><span class="hs-identifier hs-var">Dynamic</span></a><span> </span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#local-6989586621679130257" name="local-6989586621679130257"><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#local-6989586621679130257"><span class="hs-identifier">typ</span></a></a><span class="hs-special">)</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-special">[</span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#local-6989586621679130257"><span class="hs-identifier hs-var">typ</span></a><span class="hs-special">]</span><span>
+</span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#line-42" name="line-42"></a><span>
+</span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#line-43" name="line-43"></a><span>        </span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#local-6989586621679130254" name="local-6989586621679130254"><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#local-6989586621679130254"><span class="hs-identifier">multi</span></a></a><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier hs-var">maybeToList</span><span> </span><span class="hs-operator hs-var">$</span><span> </span><a href="../yesod-core-1.4.35/Yesod.Routes.TH.Types.html#resourceMulti"><span class="hs-identifier hs-var">resourceMulti</span></a><span> </span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#local-6989586621679130250"><span class="hs-identifier hs-var">res</span></a><span>
+</span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#line-44" name="line-44"></a><span>
+</span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#line-45" name="line-45"></a><span>        </span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#local-6989586621679130255" name="local-6989586621679130255"><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#local-6989586621679130255"><span class="hs-identifier">sub</span></a></a><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#line-46" name="line-46"></a><span>            </span><span class="hs-keyword">case</span><span> </span><span class="hs-identifier">resourceDispatch</span><span> </span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#local-6989586621679130250"><span class="hs-identifier hs-var">res</span></a><span> </span><span class="hs-keyword">of</span><span>
+</span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#line-47" name="line-47"></a><span>                </span><a href="../yesod-core-1.4.35/Yesod.Routes.TH.Types.html#Subsite"><span class="hs-identifier hs-var">Subsite</span></a><span> </span><span class="hs-special">{</span><span> </span><span class="hs-identifier">subsiteType</span><span> </span><span class="hs-glyph">=</span><span> </span><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#local-6989586621679130258" name="local-6989586621679130258"><a href="../yesod-core-1.4.35/src/Yesod.Routes.TH.RenderRoute.html#local-6989586621679130258"><span class="hs-identifier">typ</span></a></a><span> </span><span class="hs-special">}</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-special">[</span><span class="hs-identifier hs-var">ConT</span><span> </span><span class="hs-char">''Route `AppT` typ]
+                _ -&gt; []
+
+    mkRouteCon (ResourceParent name _check pieces children) = do
+        (cons, decs) &lt;- mkRouteCons children
+#if MIN_VERSION_template_haskell(2,12,0)
+        dec &lt;- DataD [] (mkName name) [] Nothing cons &lt;$&gt; fmap (pure . DerivClause Nothing) (mapM conT [''Show, ''Read, ''Eq])
+#elif MIN_VERSION_template_haskell(2,11,0)
+        dec &lt;- DataD [] (mkName name) [] Nothing cons &lt;$&gt; mapM conT [''Show, ''Read, ''Eq]
+#else
+        let dec = DataD [] (mkName name) [] cons [''Show, ''Read, ''Eq]
+#endif
+        return ([con], dec : decs)
+      where
+        con = NormalC (mkName name)
+            $ map (\x -&gt; (notStrict, x))
+            $ singles ++ [ConT $ mkName name]
+
+        singles = concatMap toSingle pieces
+        toSingle Static{} = []
+        toSingle (Dynamic typ) = [typ]
+
+-- | Clauses for the 'renderRoute' method.
+mkRenderRouteClauses :: [ResourceTree Type] -&gt; Q [Clause]
+mkRenderRouteClauses =
+    mapM go
+  where
+    isDynamic Dynamic{} = True
+    isDynamic _ = False
+
+    go (ResourceParent name _check pieces children) = do
+        let cnt = length $ filter isDynamic pieces
+        dyns &lt;- replicateM cnt $ newName &quot;dyn&quot;
+        child &lt;- newName &quot;child&quot;
+        let pat = ConP (mkName name) $ map VarP $ dyns ++ [child]
+
+        pack' &lt;- [|pack|]
+        tsp &lt;- [|toPathPiece|]
+        let piecesSingle = mkPieces (AppE pack' . LitE . StringL) tsp pieces dyns
+
+        childRender &lt;- newName &quot;childRender&quot;
+        let rr = VarE childRender
+        childClauses &lt;- mkRenderRouteClauses children
+
+        a &lt;- newName &quot;a&quot;
+        b &lt;- newName &quot;b&quot;
+
+        colon &lt;- [|(:)|]
+        let cons y ys = InfixE (Just y) colon (Just ys)
+        let pieces' = foldr cons (VarE a) piecesSingle
+
+        let body = LamE [TupP [VarP a, VarP b]] (TupE [pieces', VarE b]) `AppE` (rr `AppE` VarE child)
+
+        return $ Clause [pat] (NormalB body) [FunD childRender childClauses]
+
+    go (ResourceLeaf res) = do
+        let cnt = length (filter isDynamic $ resourcePieces res) + maybe 0 (const 1) (resourceMulti res)
+        dyns &lt;- replicateM cnt $ newName &quot;dyn&quot;
+        sub &lt;-
+            case resourceDispatch res of
+                Subsite{} -&gt; return &lt;$&gt; newName &quot;sub&quot;
+                _ -&gt; return []
+        let pat = ConP (mkName $ resourceName res) $ map VarP $ dyns ++ sub
+
+        pack' &lt;- [|pack|]
+        tsp &lt;- [|toPathPiece|]
+        let piecesSingle = mkPieces (AppE pack' . LitE . StringL) tsp (resourcePieces res) dyns
+
+        piecesMulti &lt;-
+            case resourceMulti res of
+                Nothing -&gt; return $ ListE []
+                Just{} -&gt; do
+                    tmp &lt;- [|toPathMultiPiece|]
+                    return $ tmp `AppE` VarE (last dyns)
+
+        body &lt;-
+            case sub of
+                [x] -&gt; do
+                    rr &lt;- [|renderRoute|]
+                    a &lt;- newName &quot;a&quot;
+                    b &lt;- newName &quot;b&quot;
+
+                    colon &lt;- [|(:)|]
+                    let cons y ys = InfixE (Just y) colon (Just ys)
+                    let pieces = foldr cons (VarE a) piecesSingle
+
+                    return $ LamE [TupP [VarP a, VarP b]] (TupE [pieces, VarE b]) `AppE` (rr `AppE` VarE x)
+                _ -&gt; do
+                    colon &lt;- [|(:)|]
+                    let cons a b = InfixE (Just a) colon (Just b)
+                    return $ TupE [foldr cons piecesMulti piecesSingle, ListE []]
+
+        return $ Clause [pat] (NormalB body) []
+
+    mkPieces _ _ [] _ = []
+    mkPieces toText tsp (Static s:ps) dyns = toText s : mkPieces toText tsp ps dyns
+    mkPieces toText tsp (Dynamic{}:ps) (d:dyns) = tsp `AppE` VarE d : mkPieces toText tsp ps dyns
+    mkPieces _ _ (Dynamic _ : _) [] = error &quot;mkPieces 120&quot;
+
+-- | Generate the 'RenderRoute' instance.
+--
+-- This includes both the 'Route' associated type and the
+-- 'renderRoute' method.  This function uses both 'mkRouteCons' and
+-- 'mkRenderRouteClasses'.
+mkRenderRouteInstance :: Type -&gt; [ResourceTree Type] -&gt; Q [Dec]
+mkRenderRouteInstance = mkRenderRouteInstance' []
+
+-- | A more general version of 'mkRenderRouteInstance' which takes an
+-- additional context.
+
+mkRenderRouteInstance' :: Cxt -&gt; Type -&gt; [ResourceTree Type] -&gt; Q [Dec]
+mkRenderRouteInstance' cxt typ ress = do
+    cls &lt;- mkRenderRouteClauses ress
+    (cons, decs) &lt;- mkRouteCons ress
+#if MIN_VERSION_template_haskell(2,12,0)
+    did &lt;- DataInstD [] ''Route [typ] Nothing cons &lt;$&gt; fmap (pure . DerivClause Nothing) (mapM conT (clazzes False))
+    let sds = fmap (\t -&gt; StandaloneDerivD cxt $ ConT t `AppT` ( ConT ''Route `AppT` typ)) (clazzes True)
+#elif MIN_VERSION_template_haskell(2,11,0)
+    did &lt;- DataInstD [] ''Route [typ] Nothing cons &lt;$&gt; mapM conT (clazzes False)
+    let sds = fmap (\t -&gt; StandaloneDerivD cxt $ ConT t `AppT` ( ConT ''Route `AppT` typ)) (clazzes True)
+#else
+    let did = DataInstD [] ''Route [typ] cons clazzes'
+    let sds = []
+#endif
+    return $ instanceD cxt (ConT ''RenderRoute `AppT` typ)
+        [ did
+        , FunD (mkName &quot;renderRoute&quot;) cls
+        ]
+        : sds ++ decs
+  where
+#if MIN_VERSION_template_haskell(2,11,0)
+    clazzes standalone = if standalone `xor` null cxt then
+          clazzes'
+        else
+          []
+#endif
+    clazzes' = [''Show, ''Eq, ''Read]
+
+#if MIN_VERSION_template_haskell(2,11,0)
+notStrict :: Bang
+notStrict = Bang NoSourceUnpackedness NoSourceStrictness
+#else
+notStrict :: Strict
+notStrict = NotStrict
+#endif
+
+instanceD :: Cxt -&gt; Type -&gt; [Dec] -&gt; Dec
+#if MIN_VERSION_template_haskell(2,11,0)
+instanceD = InstanceD Nothing
+#else
+instanceD = InstanceD
+#endif
+</span></pre></body></html>

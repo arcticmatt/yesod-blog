@@ -1,0 +1,26 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"></meta><title>Database.PostgreSQL.Simple.SqlQQ</title><link href="ocean.css" rel="stylesheet" type="text/css" title="Ocean"></link><script src="haddock-util.js" type="text/javascript"></script><script src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML" type="text/javascript"></script><script type="text/javascript">//<![CDATA[
+window.onload = function () {pageLoad();setSynopsis("mini_Database-PostgreSQL-Simple-SqlQQ.html");};
+//]]>
+</script></head><body><div id="package-header"><ul class="links" id="page-menu"><li><a href="../postgresql-simple-0.5.3.0/src/Database.PostgreSQL.Simple.SqlQQ.html">Source</a></li><li><a href="../postgresql-simple-0.5.3.0/index.html">Contents</a></li><li><a href="../postgresql-simple-0.5.3.0/doc-index.html">Index</a></li></ul><p class="caption">postgresql-simple-0.5.3.0: Mid-Level PostgreSQL client library</p></div><div id="content"><div id="module-header"><table class="info"><tr><th valign="top">Copyright</th><td>(c) 2011-2012 Leon P Smith</td></tr><tr><th>License</th><td>BSD3</td></tr><tr><th>Maintainer</th><td>Leon P Smith &lt;leon@melding-monads.com&gt;</td></tr><tr><th>Stability</th><td>experimental</td></tr><tr><th>Safe Haskell</th><td>None</td></tr><tr><th>Language</th><td>Haskell98</td></tr></table><p class="caption">Database.PostgreSQL.Simple.SqlQQ</p></div><div id="description"><p class="caption">Description</p><div class="doc empty"> </div></div><div id="synopsis"><p id="control.syn" class="caption expander" onclick="toggleSection('syn')">Synopsis</p><ul id="section.syn" class="hide" onclick="toggleSection('syn')"><li class="src short"><a href="../postgresql-simple-0.5.3.0/Database-PostgreSQL-Simple-SqlQQ.html#v:sql">sql</a> :: <a href="../template-haskell-2.11.1.0/Language-Haskell-TH-Quote.html#t:QuasiQuoter">QuasiQuoter</a></li></ul></div><div id="interface"><h1>Documentation</h1><div class="top"><p class="src"><a id="v:sql" class="def">sql</a> :: <a href="../template-haskell-2.11.1.0/Language-Haskell-TH-Quote.html#t:QuasiQuoter">QuasiQuoter</a> <a href="../postgresql-simple-0.5.3.0/src/Database.PostgreSQL.Simple.SqlQQ.html#sql" class="link">Source</a> <a href="../postgresql-simple-0.5.3.0/Database-PostgreSQL-Simple-SqlQQ.html#v:sql" class="selflink">#</a></p><div class="doc"><p><code><a href="../postgresql-simple-0.5.3.0/Database-PostgreSQL-Simple-SqlQQ.html#v:sql">sql</a></code> is a quasiquoter that eases the syntactic burden
+ of writing big sql statements in Haskell source code.  For example:</p><pre>{-# LANGUAGE QuasiQuotes #-}
+
+query conn [sql| SELECT column_a, column_b
+                   FROM table1 NATURAL JOIN table2
+                  WHERE ? &lt;= time AND time &lt; ?
+                    AND name LIKE ?
+                  ORDER BY size DESC
+                  LIMIT 100                        |]
+           (beginTime,endTime,string)</pre><p>This quasiquoter returns a literal string expression of type <code><a href="../postgresql-simple-0.5.3.0/Database-PostgreSQL-Simple-Types.html#t:Query">Query</a></code>,
+ and attempts to mimimize whitespace;  otherwise the above query would
+ consist of approximately half whitespace when sent to the database
+ backend.  It also recognizes and strips out standard sql comments &quot;--&quot;.</p><p>The implementation of the whitespace reducer is currently incomplete.
+ Thus it can mess up your syntax in cases where whitespace should be
+ preserved as-is.  It does preserve whitespace inside standard SQL string
+ literals.  But it can get confused by the non-standard PostgreSQL string
+ literal syntax (which is the default setting in PostgreSQL 8 and below),
+ the extended escape string syntax,  quoted identifiers,  and other similar
+ constructs.</p><p>Of course, this caveat only applies to text written inside the SQL
+ quasiquoter; whitespace reduction is a compile-time computation and
+ thus will not touch the <code>string</code> parameter above,  which is a run-time
+ value.</p><p>Also note that this will not work if the substring <code>|]</code> is contained
+ in the query.</p></div></div></div></div><div id="footer"><p>Produced by <a href="http://www.haskell.org/haddock/">Haddock</a> version 2.17.3</p></div></body></html>

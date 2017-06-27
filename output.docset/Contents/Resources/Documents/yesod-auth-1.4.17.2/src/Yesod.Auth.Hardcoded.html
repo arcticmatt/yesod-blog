@@ -1,0 +1,199 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><html xmlns="http://www.w3.org/1999/xhtml"><head><link rel="stylesheet" type="text/css" href="style.css"></link><script type="text/javascript" src="highlight.js"></script></head><body><pre><span class="hs-pragma">{-# LANGUAGE FlexibleContexts      #-}</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-2" name="line-2"></a><span class="hs-pragma">{-# LANGUAGE MultiParamTypeClasses #-}</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-3" name="line-3"></a><span class="hs-pragma">{-# LANGUAGE OverloadedStrings     #-}</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-4" name="line-4"></a><span class="hs-pragma">{-# LANGUAGE QuasiQuotes           #-}</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-5" name="line-5"></a><span class="hs-pragma">{-# LANGUAGE RankNTypes            #-}</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-6" name="line-6"></a><span class="hs-pragma">{-# LANGUAGE TemplateHaskell       #-}</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-7" name="line-7"></a><span class="hs-pragma">{-# LANGUAGE TypeFamilies          #-}</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-8" name="line-8"></a><span class="hs-comment">{-|
+Module      : Yesod.Auth.Hardcoded
+Description : Very simple auth plugin for hardcoded auth pairs.
+Copyright   : (c) Arthur Fayzrakhmanov, 2015
+License     : MIT
+Maintainer  : heraldhoi@gmail.com
+Stability   : experimental
+
+Sometimes you may want to have some hardcoded set of users (e.g. site managers)
+that allowed to log in and visit some specific sections of your website without
+ability to register new managers.  This simple plugin is designed exactly for
+this purpose.
+
+Here is a quick usage example.
+
+== Define hardcoded users representation
+
+Let's assume, that we want to have some hardcoded managers with normal site
+users.  Let's define hardcoded user representation:
+
+@
+data SiteManager = SiteManager
+  { manUserName :: Text
+  , manPassWord :: Text }
+  deriving Show
+
+siteManagers :: [SiteManager]
+siteManagers = [SiteManager &quot;content editor&quot; &quot;top secret&quot;]
+@
+
+
+== Describe 'YesodAuth' instance
+
+Now we need to have some convenient 'AuthId' type representing both
+cases:
+
+@
+instance YesodAuth App where
+  type AuthId App = Either UserId Text
+@
+
+Here, right @Text@ value will present hardcoded user name (which obviously must
+be unique).
+
+'AuthId' must have an instance of 'PathPiece' class, this is needed to store
+user identifier in session (this happens in 'setCreds' and 'setCredsRedirect'
+actions) and to read that identifier from session (this happens in
+`dafaultMaybeAuthId` action).  So we have to define it:
+
+@
+import Text.Read (readMaybe)
+
+instance PathPiece (Either UserId Text) where
+  fromPathPiece = readMaybe . unpack
+  toPathPiece = pack . show
+@
+
+Quiet simple so far.  Now let's add plugin to 'authPlugins' list, and define
+'authenticate' method, it should return user identifier for given credentials,
+for normal users it is usually persistent key, for hardcoded users we will
+return user name again.
+
+@
+instance YesodAuth App where
+  -- ..
+  authPlugins _ = [authHardcoded]
+
+  authenticate Creds{..} =
+    return
+      (case credsPlugin of
+         &quot;hardcoded&quot; -&gt;
+           case lookupUser credsIdent of
+             Nothing -&gt; UserError InvalidLogin
+             Just m  -&gt; Authenticated (Right (manUserName m)))
+@
+
+Here @lookupUser@ is just a helper function to lookup hardcoded users by name:
+
+@
+lookupUser :: Text -&gt; Maybe SiteManager
+lookupUser username = find (\m -&gt; manUserName m == username) siteManagers
+@
+
+
+== Describe an 'YesodAuthPersist' instance
+
+Now we need to manually define 'YesodAuthPersist' instance.
+
+&gt; instance YesodAuthPersist App where
+&gt;   type AuthEntity App = Either User SiteManager
+&gt;
+&gt;   getAuthEntity (Left uid) =
+&gt;     do x &lt;- runDB (get uid)
+&gt;        return (Left &lt;$&gt; x)
+&gt;   getAuthEntity (Right username) = return (Right &lt;$&gt; lookupUser username)
+
+
+== Define 'YesodAuthHardcoded' instance
+
+Finally, let's define an plugin instance
+
+@
+instance YesodAuthHardcoded App where
+  validatePassword u = return . validPassword u
+  doesUserNameExist  = return . isJust . lookupUser
+
+validPassword :: Text -&gt; Text -&gt; Bool
+validPassword u p =
+  case find (\m -&gt; manUserName m == u &amp;&amp; manPassWord m == p) siteManagers of
+    Just _ -&gt; True
+    _      -&gt; False
+@
+
+
+== Conclusion
+
+Now we can use 'maybeAuthId', 'maybeAuthPair', 'requireAuthId', and
+'requireAuthPair', moreover, the returned value makes possible to distinguish
+normal users and site managers.
+-}</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-128" name="line-128"></a><span class="hs-keyword">module</span><span> </span><span class="hs-identifier">Yesod</span><span class="hs-operator">.</span><span class="hs-identifier">Auth</span><span class="hs-operator">.</span><span class="hs-identifier">Hardcoded</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-129" name="line-129"></a><span>  </span><span class="hs-special">(</span><span> </span><a href="../yesod-auth-1.4.17.2/Yesod.Auth.Hardcoded.html#YesodAuthHardcoded"><span class="hs-identifier hs-type">YesodAuthHardcoded</span></a><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-130" name="line-130"></a><span>  </span><span class="hs-special">,</span><span> </span><a href="../yesod-auth-1.4.17.2/Yesod.Auth.Hardcoded.html#authHardcoded"><span class="hs-identifier hs-var">authHardcoded</span></a><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-131" name="line-131"></a><span>  </span><span class="hs-special">,</span><span> </span><a href="../yesod-auth-1.4.17.2/Yesod.Auth.Hardcoded.html#loginR"><span class="hs-identifier hs-var">loginR</span></a><span> </span><span class="hs-special">)</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-132" name="line-132"></a><span>  </span><span class="hs-keyword">where</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-133" name="line-133"></a><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-134" name="line-134"></a><span class="hs-keyword">import</span><span>           </span><a href="../yesod-auth-1.4.17.2/Yesod.Auth.html"><span class="hs-identifier">Yesod</span><span class="hs-operator">.</span><span class="hs-identifier">Auth</span></a><span>          </span><span class="hs-special">(</span><a href="../yesod-auth-1.4.17.2/Yesod.Auth.Routes.html#Auth"><span class="hs-identifier hs-type">Auth</span></a><span class="hs-special">,</span><span> </span><a href="../yesod-auth-1.4.17.2/Yesod.Auth.html#AuthPlugin"><span class="hs-identifier hs-type">AuthPlugin</span></a><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><a href="../yesod-auth-1.4.17.2/Yesod.Auth.html#AuthRoute"><span class="hs-identifier hs-type">AuthRoute</span></a><span class="hs-special">,</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-135" name="line-135"></a><span>                                      </span><a href="../yesod-auth-1.4.17.2/Yesod.Auth.html#Creds"><span class="hs-identifier hs-type">Creds</span></a><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-type">Route</span><span> </span><span class="hs-special">(</span><span class="hs-glyph">..</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><a href="../yesod-auth-1.4.17.2/Yesod.Auth.html#YesodAuth"><span class="hs-identifier hs-type">YesodAuth</span></a><span class="hs-special">,</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-136" name="line-136"></a><span>                                      </span><a href="../yesod-auth-1.4.17.2/Yesod.Auth.html#loginErrorMessageI"><span class="hs-identifier hs-var">loginErrorMessageI</span></a><span class="hs-special">,</span><span> </span><a href="../yesod-auth-1.4.17.2/Yesod.Auth.html#setCredsRedirect"><span class="hs-identifier hs-var">setCredsRedirect</span></a><span class="hs-special">)</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-137" name="line-137"></a><span class="hs-keyword">import</span><span> </span><span class="hs-keyword">qualified</span><span> </span><a href="../yesod-auth-1.4.17.2/Yesod.Auth.Message.html"><span class="hs-identifier">Yesod</span><span class="hs-operator">.</span><span class="hs-identifier">Auth</span><span class="hs-operator">.</span><span class="hs-identifier">Message</span></a><span>  </span><span class="hs-keyword">as</span><span> </span><span class="hs-identifier">Msg</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-138" name="line-138"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">Yesod</span><span class="hs-operator">.</span><span class="hs-identifier">Core</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-139" name="line-139"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">Yesod</span><span class="hs-operator">.</span><span class="hs-identifier">Form</span><span>          </span><span class="hs-special">(</span><span class="hs-identifier hs-var">ireq</span><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-var">runInputPost</span><span class="hs-special">,</span><span> </span><span class="hs-identifier hs-var">textField</span><span class="hs-special">)</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-140" name="line-140"></a><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-141" name="line-141"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">Control</span><span class="hs-operator">.</span><span class="hs-identifier">Applicative</span><span> </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="hs-operator hs-var">&lt;$&gt;</span><span class="hs-special">)</span><span class="hs-special">,</span><span> </span><span class="hs-special">(</span><span class="hs-operator hs-var">&lt;*&gt;</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-142" name="line-142"></a><span class="hs-keyword">import</span><span>           </span><span class="hs-identifier">Data</span><span class="hs-operator">.</span><span class="hs-identifier">Text</span><span>           </span><span class="hs-special">(</span><span class="hs-identifier hs-type">Text</span><span class="hs-special">)</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-143" name="line-143"></a><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-144" name="line-144"></a><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-145" name="line-145"></a><span class="hs-identifier">loginR</span><span> </span><span class="hs-glyph">::</span><span> </span><a href="../yesod-auth-1.4.17.2/Yesod.Auth.html#AuthRoute"><span class="hs-identifier hs-type">AuthRoute</span></a><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-146" name="line-146"></a><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#loginR" name="loginR"><a href="../yesod-auth-1.4.17.2/Yesod.Auth.Hardcoded.html#loginR"><span class="hs-identifier">loginR</span></a></a><span> </span><span class="hs-glyph">=</span><span> </span><a href="../yesod-auth-1.4.17.2/Yesod.Auth.Routes.html#PluginR"><span class="hs-identifier hs-var">PluginR</span></a><span> </span><span class="hs-string">&quot;hardcoded&quot;</span><span> </span><span class="hs-special">[</span><span class="hs-string">&quot;login&quot;</span><span class="hs-special">]</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-147" name="line-147"></a><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-148" name="line-148"></a><span class="hs-keyword">class</span><span> </span><span class="hs-special">(</span><a href="../yesod-auth-1.4.17.2/Yesod.Auth.html#YesodAuth"><span class="hs-identifier hs-type">YesodAuth</span></a><span> </span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#local-6989586621679653415"><span class="hs-identifier hs-type">site</span></a><span class="hs-special">)</span><span> </span><span class="hs-glyph">=&gt;</span><span> </span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#YesodAuthHardcoded" name="YesodAuthHardcoded"><a href="../yesod-auth-1.4.17.2/Yesod.Auth.Hardcoded.html#YesodAuthHardcoded"><span class="hs-identifier">YesodAuthHardcoded</span></a></a><span> </span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#local-6989586621679653415" name="local-6989586621679653415"><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#local-6989586621679653415"><span class="hs-identifier">site</span></a></a><span> </span><span class="hs-keyword">where</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-149" name="line-149"></a><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-150" name="line-150"></a><span>  </span><span class="hs-comment">-- | Check whether given user name exists among hardcoded names.</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-151" name="line-151"></a><span>  </span><span class="hs-identifier">doesUserNameExist</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-identifier hs-type">Text</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier hs-type">HandlerT</span><span> </span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#local-6989586621679653415"><span class="hs-identifier hs-type">site</span></a><span> </span><span class="hs-identifier hs-type">IO</span><span> </span><span class="hs-identifier hs-type">Bool</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-152" name="line-152"></a><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-153" name="line-153"></a><span>  </span><span class="hs-comment">-- | Validate given user name with given password.</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-154" name="line-154"></a><span>  </span><span class="hs-identifier">validatePassword</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-identifier hs-type">Text</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier hs-type">Text</span><span> </span><span class="hs-glyph">-&gt;</span><span> </span><span class="hs-identifier hs-type">HandlerT</span><span> </span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#local-6989586621679653415"><span class="hs-identifier hs-type">site</span></a><span> </span><span class="hs-identifier hs-type">IO</span><span> </span><span class="hs-identifier hs-type">Bool</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-155" name="line-155"></a><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-156" name="line-156"></a><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-157" name="line-157"></a><span class="hs-identifier">authHardcoded</span><span> </span><span class="hs-glyph">::</span><span> </span><a href="../yesod-auth-1.4.17.2/Yesod.Auth.Hardcoded.html#YesodAuthHardcoded"><span class="hs-identifier hs-type">YesodAuthHardcoded</span></a><span> </span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#local-6989586621679653417"><span class="hs-identifier hs-type">m</span></a><span> </span><span class="hs-glyph">=&gt;</span><span> </span><a href="../yesod-auth-1.4.17.2/Yesod.Auth.html#AuthPlugin"><span class="hs-identifier hs-type">AuthPlugin</span></a><span> </span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#local-6989586621679653417"><span class="hs-identifier hs-type">m</span></a><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-158" name="line-158"></a><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#authHardcoded" name="authHardcoded"><a href="../yesod-auth-1.4.17.2/Yesod.Auth.Hardcoded.html#authHardcoded"><span class="hs-identifier">authHardcoded</span></a></a><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-159" name="line-159"></a><span>  </span><a href="../yesod-auth-1.4.17.2/Yesod.Auth.html#AuthPlugin"><span class="hs-identifier hs-var">AuthPlugin</span></a><span> </span><span class="hs-string">&quot;hardcoded&quot;</span><span> </span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#local-6989586621679653418"><span class="hs-identifier hs-var">dispatch</span></a><span> </span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#local-6989586621679653419"><span class="hs-identifier hs-var">loginWidget</span></a><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-160" name="line-160"></a><span>  </span><span class="hs-keyword">where</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-161" name="line-161"></a><span>    </span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#local-6989586621679653418" name="local-6989586621679653418"><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#local-6989586621679653418"><span class="hs-identifier">dispatch</span></a></a><span> </span><span class="hs-string">&quot;POST&quot;</span><span> </span><span class="hs-special">[</span><span class="hs-string">&quot;login&quot;</span><span class="hs-special">]</span><span> </span><span class="hs-glyph">=</span><span> </span><a href="../yesod-auth-1.4.17.2/Yesod.Auth.Hardcoded.html#postLoginR"><span class="hs-identifier hs-var">postLoginR</span></a><span> </span><span class="hs-operator hs-var">&gt;&gt;=</span><span> </span><span class="hs-identifier hs-var">sendResponse</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-162" name="line-162"></a><span>    </span><span class="hs-identifier">dispatch</span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-identifier">_</span><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-identifier hs-var">notFound</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-163" name="line-163"></a><span>    </span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#local-6989586621679653419" name="local-6989586621679653419"><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#local-6989586621679653419"><span class="hs-identifier">loginWidget</span></a></a><span> </span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#local-6989586621679653420" name="local-6989586621679653420"><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#local-6989586621679653420"><span class="hs-identifier">toMaster</span></a></a><span> </span><span class="hs-glyph">=</span><span> </span><span class="hs-keyword">do</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-164" name="line-164"></a><span>      </span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#local-6989586621679653421" name="local-6989586621679653421"><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#local-6989586621679653421"><span class="hs-identifier">request</span></a></a><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-identifier hs-var">getRequest</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-165" name="line-165"></a><span>      </span><span class="hs-special">[</span><span class="hs-identifier">whamlet</span><span class="hs-glyph">|</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-166" name="line-166"></a><span>        </span><span class="hs-operator hs-var">$</span><span class="hs-identifier hs-var">newline</span><span> </span><span class="hs-identifier hs-var">never</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-167" name="line-167"></a><span>        </span><span class="hs-operator hs-var">&lt;</span><span class="hs-identifier hs-var">form</span><span> </span><span class="hs-identifier hs-var">method</span><span class="hs-glyph">=</span><span class="hs-string">&quot;post&quot;</span><span> </span><span class="hs-identifier hs-var">action</span><span class="hs-glyph">=</span><span class="hs-string">&quot;@{toMaster loginR}&quot;</span><span class="hs-operator hs-var">&gt;</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-168" name="line-168"></a><span>          </span><span class="hs-operator hs-var">$</span><span class="hs-identifier hs-var">maybe</span><span> </span><span class="hs-identifier hs-var">t</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-identifier hs-var">reqToken</span><span> </span><span class="hs-identifier hs-var">request</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-169" name="line-169"></a><span>            </span><span class="hs-operator hs-var">&lt;</span><span class="hs-identifier hs-var">input</span><span> </span><span class="hs-keyword">type</span><span class="hs-glyph">=</span><span class="hs-identifier hs-var">hidden</span><span> </span><span class="hs-identifier hs-var">name</span><span class="hs-operator hs-var">=#</span><span class="hs-special">{</span><span class="hs-identifier hs-var">defaultCsrfParamName</span><span class="hs-special">}</span><span> </span><span class="hs-identifier hs-var">value</span><span class="hs-operator hs-var">=#</span><span class="hs-special">{</span><span class="hs-identifier hs-var">t</span><span class="hs-special">}</span><span class="hs-operator hs-var">&gt;</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-170" name="line-170"></a><span>          </span><span class="hs-operator hs-var">&lt;</span><span class="hs-identifier hs-var">table</span><span class="hs-operator hs-var">&gt;</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-171" name="line-171"></a><span>            </span><span class="hs-operator hs-var">&lt;</span><span class="hs-identifier hs-var">tr</span><span class="hs-operator hs-var">&gt;</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-172" name="line-172"></a><span>              </span><span class="hs-operator hs-var">&lt;</span><span class="hs-identifier hs-var">th</span><span class="hs-operator hs-var">&gt;</span><span class="hs-identifier hs-var">_</span><span class="hs-special">{</span><span class="hs-identifier hs-var">Msg</span><span class="hs-operator hs-var">.</span><span class="hs-identifier hs-var">UserName</span><span class="hs-special">}</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-173" name="line-173"></a><span>              </span><span class="hs-operator hs-var">&lt;</span><span class="hs-identifier hs-var">td</span><span class="hs-operator hs-var">&gt;</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-174" name="line-174"></a><span>                 </span><span class="hs-operator hs-var">&lt;</span><span class="hs-identifier hs-var">input</span><span> </span><span class="hs-keyword">type</span><span class="hs-glyph">=</span><span class="hs-string">&quot;text&quot;</span><span> </span><span class="hs-identifier hs-var">name</span><span class="hs-glyph">=</span><span class="hs-string">&quot;username&quot;</span><span> </span><span class="hs-identifier hs-var">required</span><span class="hs-operator hs-var">&gt;</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-175" name="line-175"></a><span>            </span><span class="hs-operator hs-var">&lt;</span><span class="hs-identifier hs-var">tr</span><span class="hs-operator hs-var">&gt;</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-176" name="line-176"></a><span>              </span><span class="hs-operator hs-var">&lt;</span><span class="hs-identifier hs-var">th</span><span class="hs-operator hs-var">&gt;</span><span class="hs-identifier hs-var">_</span><span class="hs-special">{</span><span class="hs-identifier hs-var">Msg</span><span class="hs-operator hs-var">.</span><span class="hs-identifier hs-var">Password</span><span class="hs-special">}</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-177" name="line-177"></a><span>              </span><span class="hs-operator hs-var">&lt;</span><span class="hs-identifier hs-var">td</span><span class="hs-operator hs-var">&gt;</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-178" name="line-178"></a><span>                 </span><span class="hs-operator hs-var">&lt;</span><span class="hs-identifier hs-var">input</span><span> </span><span class="hs-keyword">type</span><span class="hs-glyph">=</span><span class="hs-string">&quot;password&quot;</span><span> </span><span class="hs-identifier hs-var">name</span><span class="hs-glyph">=</span><span class="hs-string">&quot;password&quot;</span><span> </span><span class="hs-identifier hs-var">required</span><span class="hs-operator hs-var">&gt;</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-179" name="line-179"></a><span>            </span><span class="hs-operator hs-var">&lt;</span><span class="hs-identifier hs-var">tr</span><span class="hs-operator hs-var">&gt;</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-180" name="line-180"></a><span>              </span><span class="hs-operator hs-var">&lt;</span><span class="hs-identifier hs-var">td</span><span> </span><span class="hs-identifier hs-var">colspan</span><span class="hs-glyph">=</span><span class="hs-string">&quot;2&quot;</span><span class="hs-operator hs-var">&gt;</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-181" name="line-181"></a><span>                 </span><span class="hs-operator hs-var">&lt;</span><span class="hs-identifier hs-var">button</span><span> </span><span class="hs-keyword">type</span><span class="hs-glyph">=</span><span class="hs-string">&quot;submit&quot;</span><span> </span><span class="hs-operator hs-var">.</span><span class="hs-identifier hs-var">btn</span><span> </span><span class="hs-operator hs-var">.</span><span class="hs-identifier hs-var">btn</span><span class="hs-glyph">-</span><span class="hs-identifier hs-var">success</span><span class="hs-operator hs-var">&gt;</span><span class="hs-identifier hs-var">_</span><span class="hs-special">{</span><span class="hs-identifier hs-var">Msg</span><span class="hs-operator hs-var">.</span><span class="hs-identifier hs-var">LoginTitle</span><span class="hs-special">}</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-182" name="line-182"></a><span>        </span><span class="hs-glyph">|</span><span class="hs-special">]</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-183" name="line-183"></a><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-184" name="line-184"></a><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-185" name="line-185"></a><span class="hs-identifier">postLoginR</span><span> </span><span class="hs-glyph">::</span><span> </span><span class="hs-special">(</span><a href="../yesod-auth-1.4.17.2/Yesod.Auth.Hardcoded.html#YesodAuthHardcoded"><span class="hs-identifier hs-type">YesodAuthHardcoded</span></a><span> </span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#local-6989586621679653416"><span class="hs-identifier hs-type">master</span></a><span class="hs-special">)</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-186" name="line-186"></a><span>           </span><span class="hs-glyph">=&gt;</span><span> </span><span class="hs-identifier hs-type">HandlerT</span><span> </span><a href="../yesod-auth-1.4.17.2/Yesod.Auth.Routes.html#Auth"><span class="hs-identifier hs-type">Auth</span></a><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-type">HandlerT</span><span> </span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#local-6989586621679653416"><span class="hs-identifier hs-type">master</span></a><span> </span><span class="hs-identifier hs-type">IO</span><span class="hs-special">)</span><span> </span><span class="hs-identifier hs-type">TypedContent</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-187" name="line-187"></a><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#postLoginR" name="postLoginR"><a href="../yesod-auth-1.4.17.2/Yesod.Auth.Hardcoded.html#postLoginR"><span class="hs-identifier">postLoginR</span></a></a><span> </span><span class="hs-glyph">=</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-188" name="line-188"></a><span>  </span><span class="hs-keyword">do</span><span> </span><span class="hs-special">(</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#local-6989586621679653432" name="local-6989586621679653432"><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#local-6989586621679653432"><span class="hs-identifier">username</span></a></a><span class="hs-special">,</span><span> </span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#local-6989586621679653433" name="local-6989586621679653433"><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#local-6989586621679653433"><span class="hs-identifier">password</span></a></a><span class="hs-special">)</span><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-identifier hs-var">lift</span><span> </span><span class="hs-special">(</span><span class="hs-identifier hs-var">runInputPost</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-189" name="line-189"></a><span>       </span><span class="hs-special">(</span><span class="hs-special">(</span><span class="hs-special">,</span><span class="hs-special">)</span><span> </span><span class="hs-identifier hs-var">Control</span><span class="hs-operator hs-var">.</span><span class="hs-identifier hs-var">Applicative</span><span class="hs-operator hs-var">.&lt;$&gt;</span><span> </span><span class="hs-identifier hs-var">ireq</span><span> </span><span class="hs-identifier hs-var">textField</span><span> </span><span class="hs-string">&quot;username&quot;</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-190" name="line-190"></a><span>            </span><span class="hs-identifier hs-var">Control</span><span class="hs-operator hs-var">.</span><span class="hs-identifier hs-var">Applicative</span><span class="hs-operator hs-var">.&lt;*&gt;</span><span> </span><span class="hs-identifier hs-var">ireq</span><span> </span><span class="hs-identifier hs-var">textField</span><span> </span><span class="hs-string">&quot;password&quot;</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-191" name="line-191"></a><span>     </span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#local-6989586621679653434" name="local-6989586621679653434"><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#local-6989586621679653434"><span class="hs-identifier">isValid</span></a></a><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-identifier hs-var">lift</span><span> </span><span class="hs-special">(</span><a href="../yesod-auth-1.4.17.2/Yesod.Auth.Hardcoded.html#validatePassword"><span class="hs-identifier hs-var">validatePassword</span></a><span> </span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#local-6989586621679653432"><span class="hs-identifier hs-var">username</span></a><span> </span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#local-6989586621679653433"><span class="hs-identifier hs-var">password</span></a><span class="hs-special">)</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-192" name="line-192"></a><span>     </span><span class="hs-keyword">if</span><span> </span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#local-6989586621679653434"><span class="hs-identifier hs-var">isValid</span></a><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-193" name="line-193"></a><span>        </span><span class="hs-keyword">then</span><span> </span><span class="hs-identifier hs-var">lift</span><span> </span><span class="hs-special">(</span><a href="../yesod-auth-1.4.17.2/Yesod.Auth.html#setCredsRedirect"><span class="hs-identifier hs-var">setCredsRedirect</span></a><span> </span><span class="hs-special">(</span><a href="../yesod-auth-1.4.17.2/Yesod.Auth.html#Creds"><span class="hs-identifier hs-var">Creds</span></a><span> </span><span class="hs-string">&quot;hardcoded&quot;</span><span> </span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#local-6989586621679653432"><span class="hs-identifier hs-var">username</span></a><span> </span><span class="hs-special">[</span><span class="hs-special">]</span><span class="hs-special">)</span><span class="hs-special">)</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-194" name="line-194"></a><span>        </span><span class="hs-keyword">else</span><span> </span><span class="hs-keyword">do</span><span> </span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#local-6989586621679653435" name="local-6989586621679653435"><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#local-6989586621679653435"><span class="hs-identifier">isExists</span></a></a><span> </span><span class="hs-glyph">&lt;-</span><span> </span><span class="hs-identifier hs-var">lift</span><span> </span><span class="hs-special">(</span><a href="../yesod-auth-1.4.17.2/Yesod.Auth.Hardcoded.html#doesUserNameExist"><span class="hs-identifier hs-var">doesUserNameExist</span></a><span> </span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#local-6989586621679653432"><span class="hs-identifier hs-var">username</span></a><span class="hs-special">)</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-195" name="line-195"></a><span>                </span><a href="../yesod-auth-1.4.17.2/Yesod.Auth.html#loginErrorMessageI"><span class="hs-identifier hs-var">loginErrorMessageI</span></a><span> </span><a href="../yesod-auth-1.4.17.2/Yesod.Auth.Routes.html#LoginR"><span class="hs-identifier hs-var">LoginR</span></a><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-196" name="line-196"></a><span>                                   </span><span class="hs-special">(</span><span class="hs-keyword">if</span><span> </span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#local-6989586621679653435"><span class="hs-identifier hs-var">isExists</span></a><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-197" name="line-197"></a><span>                                       </span><span class="hs-keyword">then</span><span> </span><a href="../yesod-auth-1.4.17.2/Yesod.Auth.Message.html#InvalidUsernamePass"><span class="hs-identifier hs-var">Msg</span><span class="hs-operator hs-var">.</span><span class="hs-identifier hs-var">InvalidUsernamePass</span></a><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-198" name="line-198"></a><span>                                       </span><span class="hs-keyword">else</span><span> </span><a href="../yesod-auth-1.4.17.2/Yesod.Auth.Message.html#IdentifierNotFound"><span class="hs-identifier hs-var">Msg</span><span class="hs-operator hs-var">.</span><span class="hs-identifier hs-var">IdentifierNotFound</span></a><span> </span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#local-6989586621679653432"><span class="hs-identifier hs-var">username</span></a><span class="hs-special">)</span><span>
+</span><a href="../yesod-auth-1.4.17.2/src/Yesod.Auth.Hardcoded.html#line-199" name="line-199"></a></pre></body></html>
